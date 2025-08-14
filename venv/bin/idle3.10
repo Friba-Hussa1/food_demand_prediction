@@ -1,0 +1,5 @@
+#!/Users/omisesan/Desktop/Desktop_Omisesan/APPLIED_AI_DEV/Full_Stack/project/venv/bin/python3.10
+
+from idlelib.pyshell import main
+if __name__ == '__main__':
+    main()

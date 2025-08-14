@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Inventory Forecasting Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-utensils"></i>
+                    <h1>Inventory Forecasting Dashboard</h1>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">System Status</span>
+                        <span class="stat-value" id="system-status">
+                            <i class="fas fa-circle status-indicator"></i>
+                            Ready
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="card upload-section">
+                <div class="card-header">
+                    <h2><i class="fas fa-upload"></i> Upload Dataset</h2>
+                    <p>Upload your inventory delivery data CSV file to generate forecasts</p>
+                </div>
+                <div class="card-body">
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <h3>Drag & Drop CSV File</h3>
+                            <p>or <span class="upload-link">browse files</span></p>
+                            <input type="file" id="file-input" accept=".csv" hidden>
+                        </div>
+                    </div>
+                    <div class="file-info" id="file-info" style="display: none;">
+                        <div class="file-details">
+                            <i class="fas fa-file-csv"></i>
+                            <div>
+                                <h4 id="file-name"></h4>
+                                <p id="file-stats"></p>
+                            </div>
+                        </div>
+                        <button class="btn btn-danger btn-sm" id="remove-file">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Configuration Section -->
+            <section class="card config-section">
+                <div class="card-header">
+                    <h2><i class="fas fa-cog"></i> Forecast Configuration</h2>
+                </div>
+                <div class="card-body">
+                    <form id="forecast-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="model-type">Model Type</label>
+                                <select id="model-type" name="model_type" class="form-control">
+                                    <option value="regression">Regression (Recommended)</option>
+                                    <option value="arima">ARIMA Time Series</option>
+                                    <option value="both">Both Models (Compare)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="forecast-days">Forecast Days</label>
+                                <select id="forecast-days" name="forecast_days" class="form-control">
+                                    <option value="7" selected>7 Days</option>
+                                    <option value="14">14 Days</option>
+                                    <option value="21">21 Days</option>
+                                    <option value="30">30 Days</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="anomaly-detection" name="anomaly_detection">
+                                    <span class="checkmark"></span>
+                                    Enable Anomaly Detection
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="generate-forecast" disabled>
+                            <i class="fas fa-chart-line"></i>
+                            Generate Forecast
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <div id="results-section" style="display: none;">
+                <!-- Model Performance -->
+                <section class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-bar"></i> Model Performance</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="performance-grid">
+                            <div class="performance-item">
+                                <div class="performance-label">Model Used</div>
+                                <div class="performance-value" id="model-name">-</div>
+                            </div>
+                            <div class="performance-item">
+                                <div class="performance-label">Accuracy</div>
+                                <div class="performance-value" id="model-accuracy">-</div>
+                            </div>
+                            <div class="performance-item">
+                                <div class="performance-label">Average Error</div>
+                                <div class="performance-value" id="model-error">-</div>
+                            </div>
+                            <div class="performance-item">
+                                <div class="performance-label">R² Score</div>
+                                <div class="performance-value" id="model-r2">-</div>
+                            </div>
+                        </div>
+                        <div id="model-comparison" style="display: none;" class="model-comparison">
+                            <h4>Model Comparison</h4>
+                            <p id="comparison-text"></p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Anomaly Detection Results -->
+                <section class="card" id="anomaly-section" style="display: none;">
+                    <div class="card-header">
+                        <h2><i class="fas fa-exclamation-triangle"></i> Anomaly Detection</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="anomaly-grid">
+                            <div class="anomaly-item">
+                                <div class="anomaly-label">Total Anomalies</div>
+                                <div class="anomaly-value" id="total-anomalies">-</div>
+                            </div>
+                            <div class="anomaly-item">
+                                <div class="anomaly-label">Anomaly Rate</div>
+                                <div class="anomaly-value" id="anomaly-rate">-</div>
+                            </div>
+                        </div>
+                        <div id="recent-anomalies" class="recent-anomalies">
+                            <h4>Recent Anomalous Deliveries</h4>
+                            <div id="anomaly-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Summary Statistics -->
+                <section class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-calculator"></i> Forecast Summary</h2>
+                        <div class="card-actions">
+                            <button class="btn btn-secondary" id="export-csv">
+                                <i class="fas fa-download"></i>
+                                Export CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="summary-grid" id="summary-grid">
+                            <!-- Summary items will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Chart Section -->
+                <section class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-area"></i> Forecast Visualization</h2>
+                        <div class="chart-controls">
+                            <select id="chart-item" class="form-control">
+                                <option value="wings">Wings</option>
+                                <option value="tenders">Tenders</option>
+                                <option value="fries_reg">Regular Fries</option>
+                                <option value="fries_large">Large Fries</option>
+                                <option value="veggies">Veggies</option>
+                                <option value="dips">Dips</option>
+                                <option value="drinks">Drinks</option>
+                                <option value="flavours">Flavours</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="forecast-chart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Data Table -->
+                <section class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-table"></i> Detailed Forecast Data</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table id="forecast-table" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Day</th>
+                                        <th>Wings</th>
+                                        <th>Tenders</th>
+                                        <th>Fries (Reg)</th>
+                                        <th>Fries (Large)</th>
+                                        <th>Veggies</th>
+                                        <th>Dips</th>
+                                        <th>Drinks</th>
+                                        <th>Flavours</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Table rows will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <h3>Generating Forecast...</h3>
+                <p id="loading-message">Processing your data and training models</p>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container" class="toast-container"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

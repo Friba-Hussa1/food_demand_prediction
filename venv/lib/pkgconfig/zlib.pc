@@ -1,0 +1,13 @@
+prefix=/Users/omisesan/Desktop/Desktop_Omisesan/APPLIED_AI_DEV/Full_Stack/project/venv
+exec_prefix=/Users/omisesan/Desktop/Desktop_Omisesan/APPLIED_AI_DEV/Full_Stack/project/venv
+libdir=/Users/omisesan/Desktop/Desktop_Omisesan/APPLIED_AI_DEV/Full_Stack/project/venv/lib
+sharedlibdir=/Users/omisesan/Desktop/Desktop_Omisesan/APPLIED_AI_DEV/Full_Stack/project/venv/lib
+includedir=/Users/omisesan/Desktop/Desktop_Omisesan/APPLIED_AI_DEV/Full_Stack/project/venv/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.13
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}

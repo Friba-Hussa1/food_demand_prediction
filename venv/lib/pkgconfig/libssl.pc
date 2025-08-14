@@ -1,0 +1,11 @@
+prefix=/Users/omisesan/Desktop/Desktop_Omisesan/APPLIED_AI_DEV/Full_Stack/project/venv
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: OpenSSL-libssl
+Description: Secure Sockets Layer and cryptography libraries
+Version: 3.0.17
+Requires.private: libcrypto
+Libs: -L${libdir} -lssl
+Cflags: -I${includedir}
