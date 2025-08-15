@@ -1,8 +1,0 @@
-Date,Day_of_Week,Is_Weekend,Model_Type,Model_Name,Wings_Forecast,Wings_Recommended_Stock,Tenders_Forecast,Tenders_Recommended_Stock,Fries_Reg_Forecast,Fries_Reg_Recommended_Stock,Fries_Large_Forecast,Fries_Large_Recommended_Stock,Veggies_Forecast,Veggies_Recommended_Stock,Dips_Forecast,Dips_Recommended_Stock,Drinks_Forecast,Drinks_Recommended_Stock,Flavours_Forecast,Flavours_Recommended_Stock
-2024-12-31,Tuesday,False,ARIMA,ARIMA Ensemble,4863,5835,674,809,129,155,138,165,149,179,462,554,216,259,676,812
-2025-01-01,Wednesday,False,ARIMA,ARIMA Ensemble,4725,5670,665,798,138,166,105,125,108,129,480,575,205,246,768,921
-2025-01-02,Thursday,False,ARIMA,ARIMA Ensemble,4780,5736,681,818,142,170,112,135,117,141,493,591,208,250,810,972
-2025-01-03,Friday,False,ARIMA,ARIMA Ensemble,4836,5803,699,839,144,173,115,138,112,135,508,609,211,254,772,926
-2025-01-04,Saturday,True,ARIMA,ARIMA Ensemble,4904,5885,716,859,146,175,109,131,118,142,519,623,215,258,798,957
-2025-01-05,Sunday,True,ARIMA,ARIMA Ensemble,4962,5954,733,879,148,178,119,143,116,139,528,634,218,262,844,1013
-2025-01-06,Monday,False,ARIMA,ARIMA Ensemble,4616,5539,634,761,136,163,102,123,102,122,470,564,198,237,755,906

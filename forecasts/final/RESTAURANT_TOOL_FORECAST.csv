@@ -1,8 +1,0 @@
-Date,Day_of_Week,Is_Weekend,Model_Type,Model_Name,Wings_Forecast,Wings_Recommended_Stock,Tenders_Forecast,Tenders_Recommended_Stock,Fries_Reg_Forecast,Fries_Reg_Recommended_Stock,Fries_Large_Forecast,Fries_Large_Recommended_Stock,Veggies_Forecast,Veggies_Recommended_Stock,Dips_Forecast,Dips_Recommended_Stock,Drinks_Forecast,Drinks_Recommended_Stock,Flavours_Forecast,Flavours_Recommended_Stock
-2024-12-31,Tuesday,False,Regression,Lasso,3421,4105,1130,1356,111,133,116,139,111,133,398,478,198,238,899,1079
-2025-01-01,Wednesday,False,Regression,Lasso,3421,4105,1130,1356,111,133,116,139,111,133,398,478,198,238,899,1079
-2025-01-02,Thursday,False,Regression,Lasso,3421,4105,1130,1356,111,133,116,139,111,133,398,478,198,238,899,1079
-2025-01-03,Friday,False,Regression,Lasso,3421,4105,1130,1356,111,133,116,139,111,133,398,478,198,238,899,1079
-2025-01-04,Saturday,True,Regression,Lasso,3421,4105,1130,1356,111,133,116,139,111,133,398,478,198,238,899,1079
-2025-01-05,Sunday,True,Regression,Lasso,3421,4105,1130,1356,111,133,116,139,111,133,398,478,198,238,899,1079
-2025-01-06,Monday,False,Regression,Lasso,3421,4105,1130,1356,111,133,116,139,111,133,398,478,198,238,899,1079

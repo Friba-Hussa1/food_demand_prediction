@@ -25,7 +25,7 @@ def create_directories():
     os.makedirs('forecasts/final', exist_ok=True)
 
 def load_and_prepare_data(dataset_path):
-    """Load and prepare the dataset for ARIMA modeling with preprocessing"""
+    """Load and prepare the dataset for ARIMA modeling with enhanced features"""
     df = pd.read_csv(dataset_path)
     df = df.sort_values("delivery_date").reset_index(drop=True)
     df["delivery_date"] = pd.to_datetime(df["delivery_date"])
@@ -34,12 +34,26 @@ def load_and_prepare_data(dataset_path):
     # Fill any missing values with forward fill
     df = df.fillna(method='ffill').fillna(method='bfill')
     
-    # Add day of week as external regressor
+    # Enhanced external regressors for better ARIMA performance
     df['day_of_week'] = df.index.dayofweek
     df['is_weekend'] = (df.index.dayofweek >= 5).astype(int)
+    df['is_friday'] = (df.index.dayofweek == 4).astype(int)  # Friday effect
+    df['is_monday'] = (df.index.dayofweek == 0).astype(int)  # Monday effect
     df['month'] = df.index.month
+    df['quarter'] = df.index.quarter
+    df['day_of_month'] = df.index.day
     
-    print("Dataset loaded and prepared for ARIMA modeling with preprocessing")
+    # Seasonal indicators
+    df['is_month_start'] = (df.index.day <= 5).astype(int)
+    df['is_month_end'] = (df.index.day >= 25).astype(int)
+    
+    # Cyclical encoding for better seasonal capture
+    df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
+    df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
+    df['dow_sin'] = np.sin(2 * np.pi * df['day_of_week'] / 7)
+    df['dow_cos'] = np.cos(2 * np.pi * df['day_of_week'] / 7)
+    
+    print("Dataset loaded and prepared for ARIMA modeling with enhanced features")
     print(f"Dataset shape: {df.shape}")
     print(f"Date range: {df.index.min()} to {df.index.max()}")
     
@@ -78,86 +92,57 @@ def make_stationary(series, max_diff=2):
     return series, diff_order
 
 def preprocess_series(series):
-    """Enhanced preprocessing that adapts to series characteristics"""
+    """Enhanced preprocessing with trend detection and seasonal decomposition"""
     
     # Calculate series statistics for adaptive preprocessing
-    mean_val = series.mean()
-    std_val = series.std()
-    cv = std_val / mean_val if mean_val > 0 else 0  # Coefficient of variation
-    scale = mean_val  # Series scale
-    
-    # Adaptive outlier removal based on series characteristics
-    if cv > 0.3 or scale > 1000:  # High variance or high scale series
-        # More aggressive outlier removal for volatile/large-scale series
-        Q1 = series.quantile(0.1)
-        Q3 = series.quantile(0.9)
-        IQR = Q3 - Q1
-        lower_bound = Q1 - 1.0 * IQR
-        upper_bound = Q3 + 1.0 * IQR
-    else:
-        # Standard outlier removal for stable series
-        Q1 = series.quantile(0.25)
-        Q3 = series.quantile(0.75)
-        IQR = Q3 - Q1
-        lower_bound = Q1 - 1.5 * IQR
-        upper_bound = Q3 + 1.5 * IQR
-    
-    # Cap outliers
-    series_clean = series.clip(lower=lower_bound, upper=upper_bound)
-    
-    # Adaptive transformations
-    log_transformed = False
-    
-    # Apply log transformation for high variance or high scale series
-    if cv > 0.4 or scale > 2000:
-        series_clean = np.log1p(series_clean)
-        log_transformed = True
-    
-    # Apply smoothing for very noisy series
-    if cv > 0.6:
-        # Light smoothing to reduce noise
-        series_clean = series_clean.rolling(window=3, center=True).mean().fillna(series_clean)
-    
-    return series_clean, log_transformed
-
-def auto_arima_grid_search(series, exog=None, max_p=3, max_d=2, max_q=3, seasonal=True):
-    """Enhanced ARIMA grid search with adaptive parameters based on series characteristics"""
-    
-    # Analyze series characteristics for adaptive parameter selection
     mean_val = series.mean()
     std_val = series.std()
     cv = std_val / mean_val if mean_val > 0 else 0
     scale = mean_val
     
-    print(f"\n🔍 Performing enhanced ARIMA grid search...")
-    print(f"   Series stats: Mean={mean_val:.1f}, CV={cv:.2f}, Scale={scale:.1f}")
+    # Outlier removal with IQR method
+    Q1 = series.quantile(0.25)
+    Q3 = series.quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    series_clean = series.clip(lower=lower_bound, upper=upper_bound)
     
-    # Adaptive parameter ranges based on series characteristics
-    if cv > 0.5 or scale > 2000:  # High variance or large scale series
-        # More conservative search for complex series
-        max_p = min(max_p, 2)
-        max_d = min(max_d, 1)
-        max_q = min(max_q, 2)
-        print(f"   Using conservative parameters: p≤{max_p}, d≤{max_d}, q≤{max_q}")
-    elif cv < 0.2 and scale < 500:  # Low variance, small scale series
-        # Can use more complex models for stable series
-        max_p = min(max_p + 1, 4)
-        max_q = min(max_q + 1, 4)
-        print(f"   Using expanded parameters: p≤{max_p}, d≤{max_d}, q≤{max_q}")
-    else:
-        print(f"   Using standard parameters: p≤{max_p}, d≤{max_d}, q≤{max_q}")
+    # Apply log transformation for high variance series to stabilize variance
+    log_transformed = False
+    if cv > 0.3 and scale > 100:  # More selective log transformation
+        series_clean = np.log1p(series_clean)
+        log_transformed = True
+    
+    # Detect and handle trend
+    if len(series_clean) > 14:
+        # Simple trend detection using linear regression slope
+        x = np.arange(len(series_clean))
+        slope = np.polyfit(x, series_clean, 1)[0]
+        trend_strength = abs(slope) / (std_val + 1e-8)
+        
+        # If strong trend detected, apply light smoothing
+        if trend_strength > 0.1:
+            series_clean = series_clean.rolling(window=3, center=True).mean().fillna(series_clean)
+    
+    return series_clean, log_transformed
+
+def auto_arima_grid_search(series, exog=None, max_p=2, max_d=1, max_q=2, seasonal=False):
+    """Fast ARIMA search with minimal parameters for speed"""
+    
+    print(f"\n🔍 Performing fast ARIMA search...")
     
     best_mae = float('inf')
     best_params = None
     best_model = None
-    best_model_type = None
+    best_model_type = 'ARIMA'
     results = []
     
-    # Preprocess series
+    # Simple preprocessing
     series_processed, log_transformed = preprocess_series(series)
     
-    # Use walk-forward validation
-    train_size = int(len(series_processed) * 0.8)
+    # Simple train/test split
+    train_size = int(len(series_processed) * 0.85)
     train_series = series_processed.iloc[:train_size]
     val_series = series_processed.iloc[train_size:]
     
@@ -167,13 +152,12 @@ def auto_arima_grid_search(series, exog=None, max_p=3, max_d=2, max_q=3, seasona
     else:
         train_exog = val_exog = None
     
-    # 1. Try regular ARIMA models
-    pdq_combinations = list(product(range(max_p + 1), range(max_d + 1), range(max_q + 1)))
+    # Try only the most common ARIMA models for speed
+    arima_combinations = [
+        (0, 1, 1), (1, 1, 1), (1, 0, 1), (2, 1, 1), (1, 1, 2)
+    ]
     
-    for p, d, q in pdq_combinations:
-        if p == 0 and d == 0 and q == 0:
-            continue
-            
+    for p, d, q in arima_combinations:
         try:
             model = ARIMA(train_series, exog=train_exog, order=(p, d, q))
             fitted_model = model.fit()
@@ -209,93 +193,6 @@ def auto_arima_grid_search(series, exog=None, max_p=3, max_d=2, max_q=3, seasona
         except Exception as e:
             continue
     
-    # 2. Try SARIMA models if seasonal patterns detected
-    if seasonal and len(series_processed) > 24:  # Need enough data for seasonal
-        seasonal_periods = [7]  # Weekly seasonality for daily data
-        
-        for s in seasonal_periods:
-            for p, d, q in [(1, 1, 1), (0, 1, 1), (1, 0, 1)]:  # Limited seasonal search
-                for P, D, Q in [(1, 1, 1), (0, 1, 1)]:
-                    try:
-                        model = SARIMAX(train_series, exog=train_exog, 
-                                       order=(p, d, q), 
-                                       seasonal_order=(P, D, Q, s))
-                        fitted_model = model.fit(disp=False)
-                        
-                        forecast = fitted_model.forecast(steps=len(val_series), exog=val_exog)
-                        
-                        if log_transformed:
-                            forecast = np.expm1(forecast)
-                            val_actual = np.expm1(val_series)
-                        else:
-                            val_actual = val_series
-                        
-                        val_mae = mean_absolute_error(val_actual, forecast)
-                        
-                        results.append({
-                            'model_type': 'SARIMA',
-                            'p': p, 'd': d, 'q': q, 's': s,
-                            'P': P, 'D': D, 'Q': Q,
-                            'AIC': fitted_model.aic,
-                            'BIC': fitted_model.bic,
-                            'Val_MAE': val_mae,
-                            'log_transformed': log_transformed
-                        })
-                        
-                        if val_mae < best_mae:
-                            best_mae = val_mae
-                            best_params = ((p, d, q), (P, D, Q, s))
-                            best_model_type = 'SARIMA'
-                            # Refit on full series
-                            full_model = SARIMAX(series_processed, exog=exog,
-                                               order=(p, d, q),
-                                               seasonal_order=(P, D, Q, s))
-                            best_model = full_model.fit(disp=False)
-                            
-                    except Exception as e:
-                        continue
-    
-    # 3. Try Exponential Smoothing as alternative
-    try:
-        if len(series_processed) > 14:  # Need enough data
-            model = ExponentialSmoothing(train_series, 
-                                       trend='add', 
-                                       seasonal='add' if len(train_series) > 14 else None,
-                                       seasonal_periods=7 if len(train_series) > 14 else None)
-            fitted_model = model.fit()
-            forecast = fitted_model.forecast(steps=len(val_series))
-            
-            if log_transformed:
-                forecast = np.expm1(forecast)
-                val_actual = np.expm1(val_series)
-            else:
-                val_actual = val_series
-            
-            val_mae = mean_absolute_error(val_actual, forecast)
-            
-            results.append({
-                'model_type': 'ExpSmoothing',
-                'p': 0, 'd': 0, 'q': 0, 's': 7,
-                'AIC': fitted_model.aic,
-                'BIC': fitted_model.bic,
-                'Val_MAE': val_mae,
-                'log_transformed': log_transformed
-            })
-            
-            if val_mae < best_mae:
-                best_mae = val_mae
-                best_params = 'ExpSmoothing'
-                best_model_type = 'ExpSmoothing'
-                # Refit on full series
-                full_model = ExponentialSmoothing(series_processed,
-                                                trend='add',
-                                                seasonal='add' if len(series_processed) > 14 else None,
-                                                seasonal_periods=7 if len(series_processed) > 14 else None)
-                best_model = full_model.fit()
-                
-    except Exception as e:
-        pass
-    
     print(f"✅ Best model: {best_model_type} with params: {best_params} (Val MAE: {best_mae:.2f})")
     
     # Save results
@@ -307,7 +204,7 @@ def auto_arima_grid_search(series, exog=None, max_p=3, max_d=2, max_q=3, seasona
     return best_model, best_params, results_df, best_model_type, log_transformed
 
 def train_arima_models(df):
-    """Train enhanced ARIMA models for each target variable"""
+    """Train fast ARIMA models for each target variable"""
     target_cols = ["wings", "tenders", "fries_reg", "fries_large", "veggies", "dips", "drinks", "flavours"]
     
     arima_models = {}
@@ -318,15 +215,16 @@ def train_arima_models(df):
     # Use last 25% for testing (consistent with regression models)
     split_index = int(len(df) * 0.75)
     
-    # Prepare external regressors
-    exog_cols = ['day_of_week', 'is_weekend', 'month']
+    # Enhanced external regressors for better performance
+    exog_cols = ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 
+                 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
     exog_data = df[exog_cols]
     
-    print("Training enhanced ARIMA models for each inventory item...")
+    print("Training ultra-fast ARIMA models for each inventory item...")
     print("=" * 60)
     
     for col in target_cols:
-        print(f"\n📊 Training enhanced ARIMA for {col.upper()}")
+        print(f"\n📊 Training fast ARIMA for {col.upper()}")
         print("-" * 40)
         
         series = df[col].dropna()
@@ -340,33 +238,33 @@ def train_arima_models(df):
         test_exog = exog_aligned.iloc[split_index:]
         
         try:
-            # Enhanced grid search with external regressors
+            # Fast grid search - no seasonal models for speed
             best_model, best_params, grid_results, model_type, log_transformed = auto_arima_grid_search(
-                train_series, exog=train_exog
+                train_series, exog=train_exog, seasonal=False
             )
             
             # Make predictions
             forecast_steps = len(test_series)
-            
-            if model_type == 'ExpSmoothing':
-                # Exponential smoothing doesn't use exog
-                forecast = best_model.forecast(steps=forecast_steps)
-            else:
-                # ARIMA/SARIMA models use exog
-                forecast = best_model.forecast(steps=forecast_steps, exog=test_exog)
+            forecast = best_model.forecast(steps=forecast_steps, exog=test_exog)
             
             # Transform back if log transformation was applied
             if log_transformed:
                 forecast = np.expm1(forecast)
-                # Note: test_series is already in original scale
             
             # Ensure non-negative forecasts
             forecast = np.maximum(forecast, 0)
             
-            # Calculate performance metrics
+            # Calculate performance metrics including MAPE
             mae = mean_absolute_error(test_series, forecast)
             rmse = np.sqrt(mean_squared_error(test_series, forecast))
             r2 = r2_score(test_series, forecast)
+            
+            # Calculate MAPE for better scale comparison
+            def calculate_mape(y_true, y_pred):
+                epsilon = 1e-8
+                return np.mean(np.abs((y_true - y_pred) / (y_true + epsilon))) * 100
+            
+            mape = calculate_mape(test_series.values, forecast)
             
             # Cap R² at reasonable values
             r2 = max(-1.0, min(r2, 0.99))
@@ -380,6 +278,7 @@ def train_arima_models(df):
             }
             arima_performance[col] = {
                 'MAE': mae,
+                'MAPE': mape,
                 'RMSE': rmse,
                 'R2': r2,
                 'AIC': getattr(best_model, 'aic', np.nan),
@@ -387,10 +286,10 @@ def train_arima_models(df):
                 'model_type': model_type
             }
             
-            print(f"✅ {col}: {model_type}{best_params} - MAE: {mae:.2f}, R²: {r2:.3f}")
+            print(f"✅ {col}: {model_type}{best_params} - MAE: {mae:.2f}, MAPE: {mape:.1f}%, R²: {r2:.3f}")
             
         except Exception as e:
-            print(f"❌ Failed to train enhanced ARIMA for {col}: {str(e)}")
+            print(f"❌ Failed to train fast ARIMA for {col}: {str(e)}")
             continue
     
     return arima_models, arima_params, arima_performance, split_index, model_metadata
@@ -402,8 +301,9 @@ def evaluate_arima_models(df, arima_models, split_index, model_metadata):
     all_predictions = {}
     all_actuals = {}
     
-    # Prepare external regressors for test period
-    exog_cols = ['day_of_week', 'is_weekend', 'month']
+    # Enhanced external regressors for test period
+    exog_cols = ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 
+                 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
     exog_data = df[exog_cols]
     
     for col in target_cols:
@@ -411,21 +311,11 @@ def evaluate_arima_models(df, arima_models, split_index, model_metadata):
             series = df[col].dropna()
             test_series = series.iloc[split_index:]
             
-            # Get metadata for this model
-            metadata = model_metadata.get(col, {})
-            model_type = metadata.get('model_type', 'ARIMA')
-            
             try:
-                # Make predictions with proper exog handling
+                # Make predictions - all models are ARIMA type now
                 forecast_steps = len(test_series)
-                
-                if model_type == 'ExpSmoothing':
-                    # Exponential smoothing doesn't use exog
-                    forecast = arima_models[col].forecast(steps=forecast_steps)
-                else:
-                    # ARIMA/SARIMA models need exog for forecasting
-                    test_exog = exog_data.iloc[split_index:split_index + forecast_steps]
-                    forecast = arima_models[col].forecast(steps=forecast_steps, exog=test_exog)
+                test_exog = exog_data.iloc[split_index:split_index + forecast_steps]
+                forecast = arima_models[col].forecast(steps=forecast_steps, exog=test_exog)
                 
                 all_predictions[col] = forecast.values if hasattr(forecast, 'values') else forecast
                 all_actuals[col] = test_series.values
@@ -535,18 +425,25 @@ def create_arima_visualizations(df, arima_models, arima_performance, all_predict
     print("- arima_residuals.png: Residual analysis")
 
 def generate_arima_forecast(df, arima_models, model_metadata, forecast_days=7):
-    """Generate future forecasts using enhanced ARIMA models"""
+    """Generate future forecasts using fast ARIMA models"""
     target_cols = ["wings", "tenders", "fries_reg", "fries_large", "veggies", "dips", "drinks", "flavours"]
     
     # Generate future dates
     last_date = df.index.max()
     future_dates = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=forecast_days, freq='D')
     
-    # Create future exogenous variables
+    # Create enhanced future exogenous variables
     future_exog = pd.DataFrame(index=future_dates)
     future_exog['day_of_week'] = future_dates.dayofweek
     future_exog['is_weekend'] = (future_dates.dayofweek >= 5).astype(int)
+    future_exog['is_friday'] = (future_dates.dayofweek == 4).astype(int)
+    future_exog['is_monday'] = (future_dates.dayofweek == 0).astype(int)
     future_exog['month'] = future_dates.month
+    future_exog['month_sin'] = np.sin(2 * np.pi * future_dates.month / 12)
+    future_exog['month_cos'] = np.cos(2 * np.pi * future_dates.month / 12)
+    future_exog['dow_sin'] = np.sin(2 * np.pi * future_dates.dayofweek / 7)
+    future_exog['dow_cos'] = np.cos(2 * np.pi * future_dates.dayofweek / 7)
+    future_exog['is_month_start'] = (future_dates.day <= 5).astype(int)
     
     forecast_df = pd.DataFrame()
     forecast_df['Date'] = future_dates.strftime('%Y-%m-%d')
@@ -562,12 +459,8 @@ def generate_arima_forecast(df, arima_models, model_metadata, forecast_days=7):
                 model_type = metadata.get('model_type', 'ARIMA')
                 log_transformed = metadata.get('log_transformed', False)
                 
-                if model_type == 'ExpSmoothing':
-                    # Exponential smoothing doesn't use exog
-                    forecast = model.forecast(steps=forecast_days)
-                else:
-                    # ARIMA/SARIMA models use exog
-                    forecast = model.forecast(steps=forecast_days, exog=future_exog)
+                # Generate forecast
+                forecast = model.forecast(steps=forecast_days, exog=future_exog)
                 
                 # Transform back if log transformation was applied
                 if log_transformed:
@@ -649,7 +542,7 @@ def save_arima_models(arima_models, arima_params, arima_performance, model_metad
     print("Enhanced ARIMA models and results saved to models/arima/ and results/arima/ directories")
 
 def main(dataset_path=None):
-    """Main function to run enhanced ARIMA forecasting pipeline"""
+    """Main function to run fast ARIMA forecasting pipeline"""
     if dataset_path is None:
         import sys
         if len(sys.argv) > 1:
@@ -657,7 +550,7 @@ def main(dataset_path=None):
         else:
             dataset_path = "data/inventory_delivery_forecast_data.csv"  # Default fallback
     
-    print("Starting Enhanced ARIMA Time Series Forecasting Pipeline")
+    print("Starting Ultra-Fast ARIMA Time Series Forecasting Pipeline")
     print("=" * 70)
     print(f"📊 Using dataset: {dataset_path}")
     
@@ -667,7 +560,7 @@ def main(dataset_path=None):
     # Load and prepare data
     df = load_and_prepare_data(dataset_path)
     
-    # Train enhanced ARIMA models
+    # Train fast ARIMA models
     arima_models, arima_params, arima_performance, split_index, model_metadata = train_arima_models(df)
     
     if not arima_models:
@@ -688,28 +581,24 @@ def main(dataset_path=None):
     
     # Calculate overall performance for comparison
     overall_mae = np.mean([perf['MAE'] for perf in arima_performance.values()])
+    overall_mape = np.mean([perf['MAPE'] for perf in arima_performance.values()])
     overall_r2 = np.mean([perf['R2'] for perf in arima_performance.values()])
     
-    # Model type summary
-    model_types = [perf.get('model_type', 'ARIMA') for perf in arima_performance.values()]
-    type_counts = pd.Series(model_types).value_counts()
-    
-    print(f"\n✅ Enhanced ARIMA Pipeline completed successfully!")
+    print(f"\n✅ Ultra-Fast ARIMA Pipeline completed successfully!")
     print(f"📊 Overall Performance:")
     print(f"   - Average MAE: {overall_mae:.2f}")
+    print(f"   - Average MAPE: {overall_mape:.1f}%")
     print(f"   - Average R²: {overall_r2:.3f}")
     print(f"   - Models trained: {len(arima_models)}")
-    print(f"📈 Model Types Used:")
-    for model_type, count in type_counts.items():
-        print(f"   - {model_type}: {count} models")
     
     return {
         'models': arima_models,
         'performance': arima_performance,
         'forecast': forecast_df,
         'overall_mae': overall_mae,
+        'overall_mape': overall_mape,
         'overall_r2': overall_r2,
-        'model_type': 'Enhanced ARIMA',
+        'model_type': 'Ultra-Fast ARIMA',
         'metadata': model_metadata
     }
 

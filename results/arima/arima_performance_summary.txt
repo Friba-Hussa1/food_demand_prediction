@@ -3,95 +3,95 @@ ENHANCED ARIMA MODEL PERFORMANCE SUMMARY
 
 WINGS:
   Model Type: ARIMA
-  Parameters: (0, 1, 0)
-  Log Transformed: True
-  External Regressors: ['day_of_week', 'is_weekend', 'month']
-  MAE: 774.14
-  RMSE: 1207.14
-  R²: -0.011
-  AIC: -27.77
-  BIC: -18.34
+  Parameters: (0, 1, 1)
+  Log Transformed: False
+  External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
+  MAE: 299.33
+  RMSE: 375.79
+  R²: 0.614
+  AIC: 16003.17
+  BIC: 16063.14
 
 TENDERS:
   Model Type: ARIMA
-  Parameters: (3, 1, 2)
+  Parameters: (1, 0, 1)
   Log Transformed: False
-  External Regressors: ['day_of_week', 'is_weekend', 'month']
-  MAE: 138.97
-  RMSE: 205.42
-  R²: -0.041
-  AIC: 1005.52
-  BIC: 1026.73
+  External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
+  MAE: 56.04
+  RMSE: 69.82
+  R²: 0.337
+  AIC: 12393.88
+  BIC: 12463.86
 
 FRIES_REG:
   Model Type: ARIMA
-  Parameters: (0, 1, 3)
+  Parameters: (1, 0, 1)
   Log Transformed: False
-  External Regressors: ['day_of_week', 'is_weekend', 'month']
-  MAE: 22.56
-  RMSE: 32.18
-  R²: 0.050
-  AIC: 704.81
-  BIC: 721.30
+  External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
+  MAE: 10.64
+  RMSE: 13.36
+  R²: 0.395
+  AIC: 8620.61
+  BIC: 8690.59
 
 FRIES_LARGE:
   Model Type: ARIMA
-  Parameters: (4, 2, 3)
+  Parameters: (1, 1, 2)
   Log Transformed: False
-  External Regressors: ['day_of_week', 'is_weekend', 'month']
-  MAE: 36.97
-  RMSE: 46.78
-  R²: -0.097
-  AIC: 752.17
-  BIC: 777.95
+  External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
+  MAE: 16.07
+  RMSE: 20.21
+  R²: 0.272
+  AIC: 9556.60
+  BIC: 9626.56
 
 VEGGIES:
   Model Type: ARIMA
-  Parameters: (1, 2, 3)
+  Parameters: (1, 1, 1)
   Log Transformed: False
-  External Regressors: ['day_of_week', 'is_weekend', 'month']
-  MAE: 34.88
-  RMSE: 43.82
-  R²: -0.065
-  AIC: 730.84
-  BIC: 749.59
+  External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
+  MAE: 11.68
+  RMSE: 14.30
+  R²: 0.331
+  AIC: 8853.73
+  BIC: 8918.70
 
 DIPS:
   Model Type: ARIMA
-  Parameters: (0, 1, 4)
+  Parameters: (0, 1, 1)
   Log Transformed: False
-  External Regressors: ['day_of_week', 'is_weekend', 'month']
-  MAE: 88.31
-  RMSE: 126.12
-  R²: -0.013
-  AIC: 889.79
-  BIC: 908.65
+  External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
+  MAE: 72.97
+  RMSE: 90.94
+  R²: 0.468
+  AIC: 12895.36
+  BIC: 12955.33
 
 DRINKS:
   Model Type: ARIMA
-  Parameters: (0, 2, 1)
+  Parameters: (1, 1, 2)
   Log Transformed: False
-  External Regressors: ['day_of_week', 'is_weekend', 'month']
-  MAE: 32.41
-  RMSE: 48.77
-  R²: 0.054
-  AIC: 826.75
-  BIC: 838.47
+  External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
+  MAE: 33.41
+  RMSE: 41.23
+  R²: 0.176
+  AIC: 11189.07
+  BIC: 11259.03
 
 FLAVOURS:
   Model Type: ARIMA
-  Parameters: (3, 2, 0)
+  Parameters: (1, 0, 1)
   Log Transformed: False
-  External Regressors: ['day_of_week', 'is_weekend', 'month']
-  MAE: 114.30
-  RMSE: 197.16
-  R²: -0.223
-  AIC: 975.15
-  BIC: 991.56
+  External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
+  MAE: 31.72
+  RMSE: 40.09
+  R²: 0.660
+  AIC: 10963.82
+  BIC: 11033.80
 
 OVERALL PERFORMANCE:
-  Average MAE: 155.32
-  Average R²: -0.043
+  Average MAE: 66.48
+  Average R²: 0.407
   Models trained: 8
 
 MODEL TYPE DISTRIBUTION:

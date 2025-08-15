@@ -3,24 +3,26 @@ HYPERPARAMETER TUNING RESULTS
 
 Linear Regression:
   No hyperparameters tuned
-  Cross-validation MAE: 41.828
+  Cross-validation MAE: 16.132
 
 Ridge:
-  alpha: 0.1
-  Cross-validation MAE: 30.121
+  alpha: 0.01
+  Cross-validation MAE: 16.410
 
 Lasso:
-  alpha: 1.0
-  Cross-validation MAE: 23.085
+  alpha: 0.1
+  Cross-validation MAE: 16.051
 
 ElasticNet:
   alpha: 0.1
-  l1_ratio: 0.9
-  Cross-validation MAE: 29.162
+  l1_ratio: 0.95
+  Cross-validation MAE: 16.491
 
-Random Forest:
-  max_depth: 7
-  min_samples_split: 2
-  n_estimators: 200
-  Cross-validation MAE: 48.716
+Extra Trees:
+  n_estimators: 300
+  min_samples_split: 5
+  min_samples_leaf: 1
+  max_features: None
+  max_depth: None
+  Cross-validation MAE: 20.818
 

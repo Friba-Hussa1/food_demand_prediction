@@ -1,6 +1,6 @@
 # 🍗 Restaurant Inventory Forecasting System
 
-A comprehensive machine learning system that predicts restaurant inventory needs using advanced regression models and time series analysis. This production-ready system achieved **87.1% accuracy** and provides automated inventory recommendations with safety stock calculations.
+A comprehensive machine learning system that predicts restaurant inventory needs using advanced regression models and time series analysis. This production-ready system achieved **74.0% accuracy** with **4.9% portfolio error** and provides automated inventory recommendations with safety stock calculations.
 
 ---
 
@@ -14,13 +14,13 @@ This system forecasts inventory demand for 8 key restaurant items using historic
 - **Comprehensive model comparison** between regression and ARIMA approaches
 
 ### 🏆 Key Achievement
-Transformed failing models (R² = -0.189) into production-ready forecasts (R² = 0.871) through systematic machine learning methodology.
+Transformed failing models into production-ready forecasts (R² = 0.740) with **46.1% better portfolio accuracy** than ARIMA models through systematic machine learning methodology and portfolio-level comparison.
 
 ---
 
 ## 📊 Dataset & Target Variables
 
-The dataset contains **106 records** of delivery windows with 8 inventory items:
+The dataset contains **1,461 records** (4 years: 2021-2024) of delivery windows with 8 inventory items:
 
 | Item | Description | Avg. Demand | Complexity |
 |------|-------------|-------------|------------|
@@ -121,23 +121,24 @@ Production Forecasting System/
 
 ## 📈 Model Performance
 
-### 🏆 Final Results Comparison
+### 🏆 Final Results Comparison (Production Scale: 2021-2024)
 
-| Model | MAE | R² Score | Status | Performance |
-|-------|-----|----------|--------|-------------|
-| **Lasso Regression** | **23.36** | **0.871** | ✅ **Winner** | 87.1% accuracy |
-| Ridge Regression | 24.76 | 0.856 | ✅ Good | 85.6% accuracy |
-| Linear Regression | 24.88 | 0.856 | ✅ Good | 85.6% accuracy |
-| ElasticNet | 25.00 | 0.864 | ✅ Good | 86.4% accuracy |
-| Random Forest | 74.88 | 0.435 | ❌ Overfitted | 43.5% accuracy |
-| **ARIMA Average** | **155.32** | **-0.043** | ❌ **Failed** | Worse than baseline |
+| Model | Portfolio MAPE | MAE | R² Score | Status | Performance |
+|-------|----------------|-----|----------|--------|-------------|
+| **Linear Regression** | **4.9%** | **13.46** | **0.740** | ✅ **Winner** | 74.0% accuracy |
+| Ridge Regression | 4.9% | 13.59 | 0.740 | ✅ Excellent | 74.0% accuracy |
+| Lasso Regression | 5.0% | 14.95 | 0.739 | ✅ Excellent | 73.9% accuracy |
+| ElasticNet | 5.1% | 15.60 | 0.737 | ✅ Good | 73.7% accuracy |
+| Extra Trees | 6.0% | 18.04 | 0.624 | ✅ Good | 62.4% accuracy |
+| **ARIMA Average** | **9.0%** | **66.48** | **0.407** | ❌ **Inferior** | 40.7% accuracy |
 
 ### 🎯 Key Performance Metrics
-- **Best Model**: Lasso Regression (α=1.0)
-- **Accuracy**: 87.1% (R² = 0.871)
-- **Error Rate**: ±23.36 units average
-- **Generalization**: Excellent (CV: 23.09 vs Test: 23.36)
-- **Performance Gap**: 6.6x better than ARIMA models
+- **Best Model**: Linear Regression (holistic approach)
+- **Portfolio Accuracy**: 4.9% MAPE (46.1% better than ARIMA)
+- **Individual Accuracy**: 74.0% (R² = 0.740)
+- **Error Rate**: ±13.46 units average
+- **Generalization**: Excellent (CV: 16.13 vs Test: 13.46)
+- **Performance Gap**: 4.9x better MAE, 46.1% better portfolio accuracy than ARIMA
 
 ---
 
@@ -153,14 +154,15 @@ Production Forecasting System/
 1. **Data Preprocessing**: StandardScaler + correlation-based feature selection
 2. **Cross-Validation**: TimeSeriesSplit with 3 folds for temporal validation
 3. **Hyperparameter Tuning**: GridSearchCV for optimal parameters
-4. **Model Comparison**: Comprehensive evaluation across 5 algorithms
-5. **Production Selection**: Lasso chosen for best generalization
+4. **Portfolio-Level Comparison**: Fair comparison between holistic vs per-item approaches
+5. **Production Selection**: Linear Regression chosen for best portfolio performance
 
-### Why ARIMA Failed
-- **Linear Patterns Dominate**: Business logic more important than temporal patterns
-- **Small Dataset**: 106 records insufficient for complex time series models
-- **External Factor Dependency**: Calendar and ratios outperform historical values
-- **Weak Seasonality**: Daily inventory lacks strong seasonal patterns
+### Why Regression Won Over ARIMA
+- **Cross-Item Relationships**: Holistic regression captures wings↔dips correlations
+- **Business Logic Integration**: Item ratios and totals more predictive than pure time series
+- **Portfolio Performance**: 4.9% vs 9.0% portfolio MAPE (46.1% improvement)
+- **Operational Efficiency**: One model vs eight separate ARIMA models
+- **Consistent Performance**: Stable across all items vs variable ARIMA performance
 
 ---
 
@@ -192,19 +194,21 @@ Production Forecasting System/
 ## 💼 Business Impact
 
 ### 🎯 Operational Benefits
-- **87% Forecast Accuracy**: Reliable inventory planning
-- **±23 Unit Precision**: Actionable prediction errors
+- **74% Forecast Accuracy**: Reliable inventory planning with 4.9% portfolio error
+- **±13.46 Unit Precision**: Actionable prediction errors
+- **Portfolio-Level Intelligence**: Holistic approach captures cross-item relationships
 - **Automated Recommendations**: Reduce manual planning time
 - **Safety Stock Integration**: Prevent stockouts with 20% buffer
-- **Weekend Intelligence**: Automatic demand pattern recognition
+- **Weekend Intelligence**: Automatic 31% weekend surge detection
 - **Anomaly Detection**: Early warning system for unusual patterns
 
 ### 📈 Cost Savings
-- **Reduced Waste**: Prevent overordering with accurate forecasts
+- **46.1% Better Accuracy**: Portfolio-level improvement over per-item approaches
+- **Reduced Waste**: Prevent overordering with 4.9% portfolio error rate
 - **Stockout Prevention**: Safety stock calculations minimize shortages
-- **Labor Efficiency**: Automated planning reduces manual effort
-- **Data-Driven Decisions**: Replace intuition with statistical models
-- **Quality Assurance**: Detect data errors and supply chain disruptions
+- **Cross-Item Intelligence**: Captures wings→dips relationships for better planning
+- **Labor Efficiency**: One holistic model vs eight separate models
+- **Data-Driven Decisions**: Replace intuition with portfolio-optimized forecasts
 
 ---
 
@@ -314,9 +318,11 @@ uv run restaurant_forecast_tool.py --predict --model regression --anomaly-detect
 ---
 
 **Key Success Factors:**
-- Understanding data characteristics over algorithm complexity
-- Proper validation methodology with time series considerations  
+- Portfolio-level comparison methodology for fair model evaluation
+- Understanding that holistic approaches can outperform specialized models
+- Cross-item relationship capture more valuable than individual time series patterns
 - Business logic integration in feature engineering
-- Production-ready tooling with manager-friendly outputs
+- Production-scale validation (1,461 records vs 106) for robust results
+- Manager-friendly outputs with actionable inventory recommendations
 
 ---

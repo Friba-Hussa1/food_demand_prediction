@@ -1,131 +1,131 @@
 🍗 RESTAURANT INVENTORY FORECAST - NEXT 7 DAYS
 ============================================================
 
-📊 Model Used: Lasso (Regression)
-🎯 Model Accuracy: 87.1%
-📈 Average Error: ±23 units
+📊 Model Used: Linear Regression (Regression)
+🎯 Model Accuracy: 74.0%
+📈 Average Error: ±13 units
 
 📅 DAILY FORECAST:
 ----------------------------------------
 
-📆 2024-12-31 (Tuesday)
-   Forecasted Demand:
-   • Wings       : 3776 units (Stock: 4531)
-   • Tenders     : 584 units (Stock: 701)
-   • Fries_Reg   : 116 units (Stock: 139)
-   • Fries_Large : 113 units (Stock: 136)
-   • Veggies     : 108 units (Stock: 130)
-   • Dips        : 376 units (Stock: 451)
-   • Drinks      : 181 units (Stock: 217)
-   • Flavours    : 629 units (Stock: 755)
-   📦 Total Food Items: 4697 units
-
 📆 2025-01-01 (Wednesday)
    Forecasted Demand:
-   • Wings       : 3779 units (Stock: 4535)
-   • Tenders     : 571 units (Stock: 685)
-   • Fries_Reg   : 116 units (Stock: 139)
-   • Fries_Large : 113 units (Stock: 136)
-   • Veggies     : 108 units (Stock: 130)
-   • Dips        : 376 units (Stock: 451)
-   • Drinks      : 181 units (Stock: 217)
-   • Flavours    : 631 units (Stock: 757)
-   📦 Total Food Items: 4687 units
+   • Wings       : 6660 units (Stock: 7992)
+   • Tenders     : 232 units (Stock: 278)
+   • Fries_Reg   : 141 units (Stock: 169)
+   • Fries_Large : 143 units (Stock: 172)
+   • Veggies     : 115 units (Stock: 138)
+   • Dips        : 721 units (Stock: 865)
+   • Drinks      : 259 units (Stock: 311)
+   • Flavours    : 791 units (Stock: 949)
+   📦 Total Food Items: 7291 units
 
 📆 2025-01-02 (Thursday)
    Forecasted Demand:
-   • Wings       : 3776 units (Stock: 4531)
-   • Tenders     : 574 units (Stock: 689)
-   • Fries_Reg   : 116 units (Stock: 139)
-   • Fries_Large : 113 units (Stock: 136)
-   • Veggies     : 108 units (Stock: 130)
-   • Dips        : 376 units (Stock: 451)
-   • Drinks      : 182 units (Stock: 218)
-   • Flavours    : 633 units (Stock: 760)
-   📦 Total Food Items: 4687 units
+   • Wings       : 6660 units (Stock: 7992)
+   • Tenders     : 232 units (Stock: 278)
+   • Fries_Reg   : 141 units (Stock: 169)
+   • Fries_Large : 143 units (Stock: 172)
+   • Veggies     : 115 units (Stock: 138)
+   • Dips        : 713 units (Stock: 856)
+   • Drinks      : 261 units (Stock: 313)
+   • Flavours    : 798 units (Stock: 958)
+   📦 Total Food Items: 7291 units
 
 📆 2025-01-03 (Friday)
    Forecasted Demand:
-   • Wings       : 3773 units (Stock: 4528)
-   • Tenders     : 577 units (Stock: 692)
-   • Fries_Reg   : 116 units (Stock: 139)
-   • Fries_Large : 113 units (Stock: 136)
-   • Veggies     : 108 units (Stock: 130)
-   • Dips        : 376 units (Stock: 451)
-   • Drinks      : 182 units (Stock: 218)
-   • Flavours    : 636 units (Stock: 763)
-   📦 Total Food Items: 4687 units
+   • Wings       : 6660 units (Stock: 7992)
+   • Tenders     : 232 units (Stock: 278)
+   • Fries_Reg   : 141 units (Stock: 169)
+   • Fries_Large : 142 units (Stock: 170)
+   • Veggies     : 116 units (Stock: 139)
+   • Dips        : 705 units (Stock: 846)
+   • Drinks      : 262 units (Stock: 314)
+   • Flavours    : 805 units (Stock: 966)
+   📦 Total Food Items: 7291 units
 
 📆 2025-01-04 (Saturday) 🌟 WEEKEND
    Forecasted Demand:
-   • Wings       : 3770 units (Stock: 4524)
-   • Tenders     : 580 units (Stock: 696)
-   • Fries_Reg   : 116 units (Stock: 139)
-   • Fries_Large : 113 units (Stock: 136)
-   • Veggies     : 108 units (Stock: 130)
-   • Dips        : 376 units (Stock: 451)
-   • Drinks      : 182 units (Stock: 218)
-   • Flavours    : 638 units (Stock: 766)
-   📦 Total Food Items: 4687 units
+   • Wings       : 6660 units (Stock: 7992)
+   • Tenders     : 232 units (Stock: 278)
+   • Fries_Reg   : 143 units (Stock: 172)
+   • Fries_Large : 144 units (Stock: 173)
+   • Veggies     : 111 units (Stock: 133)
+   • Dips        : 1139 units (Stock: 1367)
+   • Drinks      : -58 units (Stock: -70)
+   • Flavours    : 690 units (Stock: 828)
+   📦 Total Food Items: 7290 units
 
 📆 2025-01-05 (Sunday) 🌟 WEEKEND
    Forecasted Demand:
-   • Wings       : 3767 units (Stock: 4520)
-   • Tenders     : 583 units (Stock: 700)
-   • Fries_Reg   : 116 units (Stock: 139)
-   • Fries_Large : 113 units (Stock: 136)
-   • Veggies     : 108 units (Stock: 130)
-   • Dips        : 377 units (Stock: 452)
-   • Drinks      : 182 units (Stock: 218)
-   • Flavours    : 640 units (Stock: 768)
-   📦 Total Food Items: 4687 units
+   • Wings       : 6660 units (Stock: 7992)
+   • Tenders     : 232 units (Stock: 278)
+   • Fries_Reg   : 144 units (Stock: 173)
+   • Fries_Large : 143 units (Stock: 172)
+   • Veggies     : 112 units (Stock: 134)
+   • Dips        : 1131 units (Stock: 1357)
+   • Drinks      : -57 units (Stock: -68)
+   • Flavours    : 697 units (Stock: 836)
+   📦 Total Food Items: 7291 units
 
 📆 2025-01-06 (Monday)
    Forecasted Demand:
-   • Wings       : 3785 units (Stock: 4542)
-   • Tenders     : 565 units (Stock: 678)
-   • Fries_Reg   : 116 units (Stock: 139)
-   • Fries_Large : 113 units (Stock: 136)
-   • Veggies     : 108 units (Stock: 130)
-   • Dips        : 376 units (Stock: 451)
-   • Drinks      : 181 units (Stock: 217)
-   • Flavours    : 627 units (Stock: 752)
-   📦 Total Food Items: 4687 units
+   • Wings       : 6660 units (Stock: 7992)
+   • Tenders     : 232 units (Stock: 278)
+   • Fries_Reg   : 141 units (Stock: 169)
+   • Fries_Large : 145 units (Stock: 174)
+   • Veggies     : 113 units (Stock: 136)
+   • Dips        : 737 units (Stock: 884)
+   • Drinks      : 257 units (Stock: 308)
+   • Flavours    : 777 units (Stock: 932)
+   📦 Total Food Items: 7291 units
+
+📆 2025-01-07 (Tuesday)
+   Forecasted Demand:
+   • Wings       : 6660 units (Stock: 7992)
+   • Tenders     : 232 units (Stock: 278)
+   • Fries_Reg   : 141 units (Stock: 169)
+   • Fries_Large : 144 units (Stock: 173)
+   • Veggies     : 114 units (Stock: 137)
+   • Dips        : 729 units (Stock: 875)
+   • Drinks      : 258 units (Stock: 310)
+   • Flavours    : 784 units (Stock: 941)
+   📦 Total Food Items: 7291 units
 
 ============================================================
 📋 WEEKLY SUMMARY:
 ------------------------------
-Wings          : 26426 units forecast, 31711 recommended stock
-Tenders        : 4034 units forecast, 4841 recommended stock
-Fries_Reg      :  812 units forecast,  973 recommended stock
-Fries_Large    :  791 units forecast,  952 recommended stock
-Veggies        :  756 units forecast,  910 recommended stock
-Dips           : 2633 units forecast, 3158 recommended stock
-Drinks         : 1271 units forecast, 1523 recommended stock
-Flavours       : 4434 units forecast, 5321 recommended stock
+Wings          : 46620 units forecast, 55944 recommended stock
+Tenders        : 1624 units forecast, 1946 recommended stock
+Fries_Reg      :  992 units forecast, 1190 recommended stock
+Fries_Large    : 1004 units forecast, 1206 recommended stock
+Veggies        :  796 units forecast,  955 recommended stock
+Dips           : 5875 units forecast, 7050 recommended stock
+Drinks         : 1182 units forecast, 1418 recommended stock
+Flavours       : 5342 units forecast, 6410 recommended stock
 
-🎯 Total Weekly Food: 32819 units
+🎯 Total Weekly Food: 51036 units
 
 ============================================================
 💡 MANAGER INSIGHTS:
 -------------------------
 🌟 2 weekend days in forecast period
-📊 Highest demand: 98      Tuesday
-98    Wednesday
-98     Thursday
-98       Friday
-98     Saturday
-98       Sunday
-98       Monday
-Name: Day_of_Week, dtype: object (98    4697
-98    4687
-98    4687
-98    4687
-98    4687
-98    4687
-98    4687
+📊 Highest demand: 1446    Wednesday
+1446     Thursday
+1446       Friday
+1446     Saturday
+1446       Sunday
+1446       Monday
+1446      Tuesday
+Name: Day_of_Week, dtype: object (1446    7291
+1446    7291
+1446    7291
+1446    7290
+1446    7291
+1446    7291
+1446    7291
 Name: Total_Food_Items, dtype: int64 units)
-🥇 Top item this week: Wings (26426 units)
+🥇 Top item this week: Wings (46620 units)
 
 ============================================================
 ⚠️  IMPORTANT NOTES:
@@ -133,4 +133,4 @@ Name: Total_Food_Items, dtype: int64 units)
 • Recommended stock includes 20% safety buffer
 • Monitor actual vs forecast daily and adjust as needed
 • Consider local events, weather, and promotions
-• Model accuracy: 87.1% - expect ±23 unit variation
+• Model accuracy: 74.0% - expect ±13 unit variation
