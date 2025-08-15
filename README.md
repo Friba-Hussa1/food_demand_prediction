@@ -1,18 +1,33 @@
-# 🍗 Restaurant Inventory Forecasting System
+# 🍗 Restaurant Inventory Forecasting Dashboard  
 
+<<<<<<< HEAD
 A comprehensive machine learning system that predicts restaurant inventory needs using advanced regression models and time series analysis. This production-ready system achieved **74.0% accuracy** with **4.9% portfolio error** and provides automated inventory recommendations with safety stock calculations.
+=======
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](#)  
+[![Python](https://img.shields.io/badge/Python-3.10+-blue)](#)  
+[![Flask](https://img.shields.io/badge/Flask-2.3+-red)](#)  
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue)](#)  
+
+A **user-friendly web dashboard** that empowers restaurant managers to **predict inventory needs**,  
+**analyze sales trends**, and **detect anomalies** — helping make smarter stocking decisions, all in one place.  
+>>>>>>> origin/deployment
 
 ---
 
-## 🎯 Project Overview
+## 🎯 **Key Features**
 
-This system forecasts inventory demand for 8 key restaurant items using historical sales data, enabling:
+### 📊 Forecasting & Analysis
+- **Multiple Models**: Regression, ARIMA, and anomaly detection
+- **Model Selection**: Automatically picks the most accurate forecast
+- **Anomaly Alerts**: Highlights unusual sales trends in real-time
 
-- **Automated inventory planning** with 87% accuracy
-- **Safety stock calculations** with 20% buffer recommendations  
-- **Production-ready forecasting tool** with manager-friendly reports
-- **Comprehensive model comparison** between regression and ARIMA approaches
+### 🖥 Manager-Friendly Interface
+- **Drag & Drop CSV Upload**
+- **Interactive Charts & Tables**
+- **Export Forecasts** to CSV
+- **Responsive Design** — Mobile & Desktop Friendly
 
+<<<<<<< HEAD
 ### 🏆 Key Achievement
 Transformed failing models into production-ready forecasts (R² = 0.740) with **46.1% better portfolio accuracy** than ARIMA models through systematic machine learning methodology and portfolio-level comparison.
 
@@ -32,41 +47,76 @@ The dataset contains **1,461 records** (4 years: 2021-2024) of delivery windows 
 | `dips` | Dip containers | ~500 units | Medium |
 | `drinks` | Fountain drinks | ~220 units | Medium |
 | `flavours` | Sauce flavors | ~770 units | Medium |
+=======
+### 🚀 Deployment Ready
+- **Dockerized** for quick setup
+- **Secure File Handling**
+- **Optimized for Performance**
+- Works **locally** or in the **cloud**
 
 ---
 
-## 🚀 Quick Start
+## 📦 **Prerequisites**
+- **Python** 3.10+
+- **Docker & Docker Compose** (for containerized setup)
+- **8GB RAM** (recommended for large datasets)
+>>>>>>> origin/deployment
 
-### Installation
+---
+
+## ⚡ **Quick Start**
+
+### **Option 1 — Run with Docker (Recommended)**
 ```bash
-# Clone repository
 git clone <repository-url>
-cd food_demand_prediction
+cd restaurant-inventory-forecasting
+docker-compose up --build
+Access at: http://localhost:5000
+Option 2 — Run Locally
+git clone <repository-url>
+cd restaurant-inventory-forecasting
 
-# Install dependencies (using uv)
-uv sync
-```
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-### Basic Usage
-```bash
-# Generate forecast using both models (recommended)
-uv run restaurant_forecast_tool.py --dataset data/inventory_delivery_forecast_data.csv --model both --days 7
+# Install dependencies
+pip install -r requirements.txt
 
-# Use pre-trained models for quick predictions
-uv run restaurant_forecast_tool.py --predict --model regression --days 14
+# Start application
+python app.py
+Access at: http://localhost:5000
+📁 Project Structure
+project/
+├── app.py                 # Flask backend
+├── templates/             # HTML templates
+├── static/                # CSS & JS files
+├── models/                # Trained ML models
+├── uploads/               # User file uploads
+├── Dockerfile
+├── docker-compose.yml
+└── requirements.txt
 
-# Export forecasts to CSV
-uv run restaurant_forecast_tool.py --dataset data/your_data.csv --model regression --save-csv
+🛠 How It Works
+Upload your sales/inventory CSV
+Choose model type & forecast days
+Generate forecast with one click
+Review charts, tables, and anomalies
+Export results to CSV
 
-# Run with anomaly detection monitoring
-uv run restaurant_forecast_tool.py --dataset data/inventory_delivery_forecast_data.csv --anomaly-detection
-```
+📊 Example CSV Format
+delivery_date,wings,tenders,fries_reg,fries_large,veggies,dips,drinks,flavours
+2024-01-01,5139,545,131,145,140,471,217,721
+Required columns: delivery_date + product quantities
 
-### Training Individual Models
-```bash
-# Train regression models
-uv run inventory_forecasting_regression.py data/inventory_delivery_forecast_data.csv
+☁️ Deployment Options
+Local Docker
+AWS EC2 / Lightsail
+Azure Container Instances
+Heroku / Render
+docker-compose --profile production up -d
 
+<<<<<<< HEAD
 # Train ARIMA models (requires statsmodels)
 uv run arima_forecasting.py data/inventory_delivery_forecast_data.csv
 
@@ -326,3 +376,11 @@ uv run restaurant_forecast_tool.py --predict --model regression --anomaly-detect
 - Manager-friendly outputs with actionable inventory recommendations
 
 ---
+=======
+👥 Authors
+Abdul-Rasaq Omisesan
+Bikash Giri
+Gavriel Kirichenko
+Callum Arul
+Friba Hussainyar
+>>>>>>> origin/deployment

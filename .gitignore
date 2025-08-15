@@ -1,6 +1,5 @@
-CLAUDE.md
-.aider.chat.history.md
-.aider.input.history
-.aider.tags.cache.v4/
-.env
+
+venv/
 __pycache__/
+*.pyc
+.DS_Store
