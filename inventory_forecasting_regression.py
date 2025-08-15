@@ -37,8 +37,7 @@ def create_directories():
     os.makedirs('models/regression', exist_ok=True)
     os.makedirs('results/regression', exist_ok=True)
     os.makedirs('results/regression/plots', exist_ok=True)
-    os.makedirs('results/regression/manager_reports', exist_ok=True)
-    os.makedirs('forecasts/final', exist_ok=True)
+    # Removed manager_reports and forecasts/final directories
 
 def load_and_prepare_data(dataset_path):
     """Load and prepare the dataset"""
@@ -445,287 +444,38 @@ def create_comprehensive_visualizations(y_test, all_predictions, all_metrics, cv
     print("- residual_analysis.png: Residual analysis for best model")
     print("- error_distribution.png: Error distribution across models")
 
-def generate_future_features(df_fe, target_cols, forecast_days=7):
-    """Generate features for future forecasting"""
-    # Get the last row of data for feature generation
-    last_row = df_fe.iloc[-1].copy()
-    future_features = []
-    
-    for day in range(1, forecast_days + 1):
-        future_row = last_row.copy()
-        
-        # Update date
-        future_date = pd.to_datetime(last_row['delivery_date']) + pd.Timedelta(days=day)
-        future_row['delivery_date'] = future_date
-        
-        # Update calendar features
-        future_row['day_of_week'] = future_date.dayofweek
-        future_row['month'] = future_date.month
-        future_row['day_of_month'] = future_date.day
-        future_row['is_weekend'] = int(future_date.dayofweek >= 5)
-        future_row['days_since_start'] = (future_date - pd.to_datetime(df_fe['delivery_date'].min())).days
-        
-        # For lag features, use the most recent actual values or previous predictions
-        # This is a simplified approach - in practice, you'd use the predicted values from previous days
-        for col in target_cols:
-            # Use last known values for lag features (simplified)
-            future_row[f"{col}_lag1"] = last_row[col]
-            
-            # For rolling averages, use recent historical data
-            recent_values = df_fe[col].tail(7).values
-            future_row[f"{col}_roll3"] = np.mean(recent_values[-3:])
-            future_row[f"{col}_roll7"] = np.mean(recent_values)
-        
-        # Update cross-product features based on recent averages
-        recent_wings = df_fe['wings'].tail(7).mean()
-        recent_tenders = df_fe['tenders'].tail(7).mean()
-        recent_fries_reg = df_fe['fries_reg'].tail(7).mean()
-        recent_fries_large = df_fe['fries_large'].tail(7).mean()
-        recent_veggies = df_fe['veggies'].tail(7).mean()
-        
-        future_row['wings_tenders_ratio'] = recent_wings / (recent_tenders + 1)
-        future_row['fries_total'] = recent_fries_reg + recent_fries_large
-        future_row['total_food'] = recent_wings + recent_tenders + recent_fries_reg + recent_fries_large + recent_veggies
-        
-        future_features.append(future_row)
-    
-    return pd.DataFrame(future_features)
+# Removed generate_future_features function - forecasting is now handled by restaurant_forecast_tool.py
 
-def create_manager_forecast(models, scaler, selector, df_fe, target_cols, selected_features, best_model_name, forecast_days=7):
-    """Create actionable forecast for restaurant manager"""
-    
-    # Generate future features
-    future_df = generate_future_features(df_fe, target_cols, forecast_days)
-    
-    # Prepare features for prediction
-    X_future = future_df.drop(columns=["delivery_date"] + target_cols)
-    X_future_scaled = scaler.transform(X_future)
-    X_future_selected = X_future_scaled[:, selector.indices]
-    
-    # Get best model
-    best_model = models[best_model_name]
-    
-    # Make predictions
-    predictions = best_model.predict(X_future_selected)
-    
-    # Create forecast dataframe
-    forecast_df = pd.DataFrame()
-    forecast_df['Date'] = future_df['delivery_date'].dt.strftime('%Y-%m-%d')
-    forecast_df['Day_of_Week'] = future_df['delivery_date'].dt.day_name()
-    forecast_df['Is_Weekend'] = future_df['is_weekend'].astype(bool)
-    
-    # Add predictions for each item
-    for i, col in enumerate(target_cols):
-        forecast_df[f'{col.title()}_Forecast'] = np.round(predictions[:, i]).astype(int)
-    
-    # Calculate totals and safety stock
-    forecast_df['Total_Food_Items'] = (
-        forecast_df['Wings_Forecast'] + 
-        forecast_df['Tenders_Forecast'] + 
-        forecast_df['Fries_Reg_Forecast'] + 
-        forecast_df['Fries_Large_Forecast'] + 
-        forecast_df['Veggies_Forecast']
-    )
-    
-    # Add safety stock (20% buffer for uncertainty)
-    safety_factor = 1.2
-    for col in target_cols:
-        col_title = col.title()
-        forecast_df[f'{col_title}_Recommended_Stock'] = np.round(
-            forecast_df[f'{col_title}_Forecast'] * safety_factor
-        ).astype(int)
-    
-    return forecast_df
+# Removed create_manager_forecast function - forecasting is now handled by restaurant_forecast_tool.py
 
 def save_manager_report(forecast_df, target_cols, best_model_name, best_model_metrics, model_type="Regression"):
-    """Save manager-friendly forecast report"""
+    """Save manager-friendly forecast report - REMOVED to avoid duplicate/incorrect files"""
     
-    # Create manager summary
-    with open('results/regression/manager_reports/MANAGER_INVENTORY_FORECAST.txt', 'w') as f:
-        f.write("🍗 RESTAURANT INVENTORY FORECAST - NEXT 7 DAYS\n")
-        f.write("=" * 60 + "\n\n")
-        
-        f.write(f"📊 Model Used: {best_model_name} ({model_type})\n")
-        if 'R2' in best_model_metrics:
-            f.write(f"🎯 Model Accuracy: {best_model_metrics['R2']:.1%}\n")
-        f.write(f"📈 Average Error: ±{best_model_metrics['MAE']:.0f} units\n\n")
-        
-        f.write("📅 DAILY FORECAST:\n")
-        f.write("-" * 40 + "\n")
-        
-        for _, row in forecast_df.iterrows():
-            f.write(f"\n📆 {row['Date']} ({row['Day_of_Week']})")
-            if row['Is_Weekend']:
-                f.write(" 🌟 WEEKEND")
-            f.write("\n")
-            
-            f.write("   Forecasted Demand:\n")
-            for col in target_cols:
-                col_title = col.title()
-                forecast_val = row[f'{col_title}_Forecast']
-                stock_val = row[f'{col_title}_Recommended_Stock']
-                f.write(f"   • {col_title:<12}: {forecast_val:>3} units (Stock: {stock_val:>3})\n")
-            
-            f.write(f"   📦 Total Food Items: {row['Total_Food_Items']} units\n")
-        
-        f.write("\n" + "=" * 60 + "\n")
-        f.write("📋 WEEKLY SUMMARY:\n")
-        f.write("-" * 30 + "\n")
-        
-        # Weekly totals
-        for col in target_cols:
-            col_title = col.title()
-            weekly_forecast = forecast_df[f'{col_title}_Forecast'].sum()
-            weekly_stock = forecast_df[f'{col_title}_Recommended_Stock'].sum()
-            f.write(f"{col_title:<15}: {weekly_forecast:>4} units forecast, {weekly_stock:>4} recommended stock\n")
-        
-        total_weekly = forecast_df['Total_Food_Items'].sum()
-        f.write(f"\n🎯 Total Weekly Food: {total_weekly} units\n")
-        
-        f.write("\n" + "=" * 60 + "\n")
-        f.write("💡 MANAGER INSIGHTS:\n")
-        f.write("-" * 25 + "\n")
-        
-        # Weekend analysis
-        weekend_count = forecast_df['Is_Weekend'].sum()
-        if weekend_count > 0:
-            weekend_avg = forecast_df[forecast_df['Is_Weekend']]['Total_Food_Items'].mean()
-            weekday_avg = forecast_df[~forecast_df['Is_Weekend']]['Total_Food_Items'].mean()
-            if weekend_avg > weekday_avg:
-                f.write(f"📈 Weekend demand ~{((weekend_avg/weekday_avg-1)*100):.0f}% higher than weekdays\n")
-            f.write(f"🌟 {weekend_count} weekend days in forecast period\n")
-        
-        # Peak day
-        peak_day = forecast_df.loc[forecast_df['Total_Food_Items'].idxmax()]
-        f.write(f"📊 Highest demand: {peak_day['Day_of_Week']} ({peak_day['Total_Food_Items']} units)\n")
-        
-        # Most demanded item
-        item_totals = {}
-        for col in target_cols:
-            col_title = col.title()
-            item_totals[col_title] = forecast_df[f'{col_title}_Forecast'].sum()
-        
-        top_item = max(item_totals, key=item_totals.get)
-        f.write(f"🥇 Top item this week: {top_item} ({item_totals[top_item]} units)\n")
-        
-        f.write("\n" + "=" * 60 + "\n")
-        f.write("⚠️  IMPORTANT NOTES:\n")
-        f.write("-" * 25 + "\n")
-        f.write("• Recommended stock includes 20% safety buffer\n")
-        f.write("• Monitor actual vs forecast daily and adjust as needed\n")
-        f.write("• Consider local events, weather, and promotions\n")
-        f.write(f"• Model accuracy: {best_model_metrics['R2']:.1%} - expect ±{best_model_metrics['MAE']:.0f} unit variation\n")
-    
-    # Save CSV for easy import to spreadsheet
-    forecast_df.to_csv('results/regression/manager_reports/manager_forecast.csv', index=False)
-    
-    # Also save the best model forecast in the final directory
-    forecast_df.to_csv('forecasts/final/BEST_MODEL_FORECAST.csv', index=False)
-    
-    # Save the best model forecast text report in final directory
-    with open('forecasts/final/BEST_MODEL_FORECAST.txt', 'w') as f:
-        f.write("🏆 BEST MODEL INVENTORY FORECAST - PRODUCTION READY\n")
-        f.write("=" * 60 + "\n\n")
-        
-        f.write(f"📊 Selected Model: {best_model_name} ({model_type})\n")
-        if 'R2' in best_model_metrics:
-            f.write(f"🎯 Model Accuracy: {best_model_metrics['R2']:.1%}\n")
-        f.write(f"📈 Average Error: ±{best_model_metrics['MAE']:.0f} units\n")
-        f.write(f"🔬 Model Type: {model_type}\n")
-        f.write(f"📅 Generated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-        
-        f.write("📅 DAILY FORECAST:\n")
-        f.write("-" * 40 + "\n")
-        
-        for _, row in forecast_df.iterrows():
-            f.write(f"\n📆 {row['Date']} ({row['Day_of_Week']})")
-            if row['Is_Weekend']:
-                f.write(" 🌟 WEEKEND")
-            f.write("\n")
-            
-            f.write("   Forecasted Demand:\n")
-            for col in target_cols:
-                col_title = col.title()
-                forecast_val = row[f'{col_title}_Forecast']
-                stock_val = row[f'{col_title}_Recommended_Stock']
-                f.write(f"   • {col_title:<12}: {forecast_val:>3} units (Stock: {stock_val:>3})\n")
-            
-            f.write(f"   📦 Total Food Items: {row['Total_Food_Items']} units\n")
-        
-        f.write("\n" + "=" * 60 + "\n")
-        f.write("📋 WEEKLY SUMMARY:\n")
-        f.write("-" * 30 + "\n")
-        
-        # Weekly totals
-        for col in target_cols:
-            col_title = col.title()
-            weekly_forecast = forecast_df[f'{col_title}_Forecast'].sum()
-            weekly_stock = forecast_df[f'{col_title}_Recommended_Stock'].sum()
-            f.write(f"{col_title:<15}: {weekly_forecast:>4} units forecast, {weekly_stock:>4} recommended stock\n")
-        
-        total_weekly = forecast_df['Total_Food_Items'].sum()
-        f.write(f"\n🎯 Total Weekly Food: {total_weekly} units\n")
-        
-        f.write("\n" + "=" * 60 + "\n")
-        f.write("💡 PRODUCTION INSIGHTS:\n")
-        f.write("-" * 25 + "\n")
-        
-        # Weekend analysis
-        weekend_count = forecast_df['Is_Weekend'].sum()
-        if weekend_count > 0:
-            weekend_avg = forecast_df[forecast_df['Is_Weekend']]['Total_Food_Items'].mean()
-            weekday_avg = forecast_df[~forecast_df['Is_Weekend']]['Total_Food_Items'].mean()
-            if weekend_avg > weekday_avg:
-                f.write(f"📈 Weekend demand ~{((weekend_avg/weekday_avg-1)*100):.0f}% higher than weekdays\n")
-            f.write(f"🌟 {weekend_count} weekend days in forecast period\n")
-        
-        # Peak day
-        peak_day = forecast_df.loc[forecast_df['Total_Food_Items'].idxmax()]
-        f.write(f"📊 Highest demand: {peak_day['Day_of_Week']} ({peak_day['Total_Food_Items']} units)\n")
-        
-        # Most demanded item
-        item_totals = {}
-        for col in target_cols:
-            col_title = col.title()
-            item_totals[col_title] = forecast_df[f'{col_title}_Forecast'].sum()
-        
-        top_item = max(item_totals, key=item_totals.get)
-        f.write(f"🥇 Top item this week: {top_item} ({item_totals[top_item]} units)\n")
-        
-        f.write("\n" + "=" * 60 + "\n")
-        f.write("⚠️  PRODUCTION NOTES:\n")
-        f.write("-" * 25 + "\n")
-        f.write("• This is the BEST performing model from comprehensive testing\n")
-        f.write("• Recommended stock includes 20% safety buffer\n")
-        f.write("• Monitor actual vs forecast daily and adjust as needed\n")
-        f.write("• Consider local events, weather, and promotions\n")
-        f.write(f"• Model accuracy: {best_model_metrics['R2']:.1%} - expect ±{best_model_metrics['MAE']:.0f} unit variation\n")
-        f.write("• Use this forecast for production inventory planning\n")
-    
-    print("\n🎯 MANAGER FORECAST GENERATED!")
+    print("\n🎯 REGRESSION TRAINING COMPLETE!")
     print("=" * 50)
-    print("📁 Files created for restaurant manager:")
-    print("   • results/regression/manager_reports/MANAGER_INVENTORY_FORECAST.txt - Detailed forecast report")
-    print("   • results/regression/manager_reports/manager_forecast.csv - Spreadsheet-friendly data")
-    print("   • forecasts/final/BEST_MODEL_FORECAST.txt - Production-ready forecast")
-    print("   • forecasts/final/BEST_MODEL_FORECAST.csv - Production-ready data")
+    print("📁 Model files saved to models/regression/ directory")
+    print("📊 Performance metrics saved to results/regression/ directory")
+    print("📈 Visualizations saved to results/regression/plots/ directory")
+    print("\n💡 Use 'uv run restaurant_forecast_tool.py' to generate accurate forecasts")
 
 
 def save_comprehensive_results(all_metrics, all_predictions, y_test, target_cols, selected_features, best_params, cv_scores):
-    """Save comprehensive results including CV scores and hyperparameters"""
+    """Save comprehensive results including CV scores and hyperparameters - TRAINING RESULTS ONLY"""
     
-    # Save detailed performance report
+    # Save detailed performance report - TRAINING METRICS ONLY
     with open('results/regression/model_performance_detailed.txt', 'w') as f:
-        f.write("COMPREHENSIVE MODEL PERFORMANCE REPORT\n")
+        f.write("REGRESSION MODEL TRAINING RESULTS\n")
         f.write("=" * 80 + "\n\n")
+        f.write("⚠️  NOTE: These are TRAINING performance metrics only.\n")
+        f.write("   For actual forecasts, use 'uv run restaurant_forecast_tool.py'\n\n")
         
         # Find best model overall
         best_model = min(all_metrics.keys(), key=lambda x: all_metrics[x]['MAE'])
-        f.write(f"🏆 BEST OVERALL MODEL: {best_model}\n")
+        f.write(f"🏆 BEST TRAINING MODEL: {best_model}\n")
         f.write("=" * 80 + "\n\n")
         
         # Performance summary table
-        f.write("PERFORMANCE SUMMARY\n")
+        f.write("TRAINING PERFORMANCE SUMMARY\n")
         f.write("-" * 50 + "\n")
         f.write(f"{'Model':<15} {'Test MAE':<10} {'CV MAE':<10} {'R²':<8} {'RMSE':<10}\n")
         f.write("-" * 50 + "\n")
@@ -743,7 +493,7 @@ def save_comprehensive_results(all_metrics, all_predictions, y_test, target_cols
         f.write("\n" + "=" * 80 + "\n\n")
         
         # Detailed metrics for each model
-        f.write("DETAILED MODEL METRICS\n")
+        f.write("DETAILED TRAINING METRICS\n")
         f.write("-" * 50 + "\n\n")
         
         for model_name, metrics in all_metrics.items():
@@ -778,7 +528,7 @@ def save_comprehensive_results(all_metrics, all_predictions, y_test, target_cols
         f.write("\n" + "=" * 80 + "\n\n")
         
         # Model insights
-        f.write("KEY INSIGHTS:\n")
+        f.write("TRAINING INSIGHTS:\n")
         f.write("-" * 20 + "\n")
         
         # Best and worst performers
@@ -797,8 +547,13 @@ def save_comprehensive_results(all_metrics, all_predictions, y_test, target_cols
                 f.write(f"  {model_name}: {status} (Test-CV: {overfitting:+.2f})\n")
             else:
                 f.write(f"  {model_name}: N/A (Ensemble model)\n")
+        
+        f.write("\n" + "=" * 80 + "\n\n")
+        f.write("💡 FOR ACTUAL FORECASTS:\n")
+        f.write("   Use: uv run restaurant_forecast_tool.py --dataset your_data.csv\n")
+        f.write("   This will generate accurate forecasts using the trained models.\n")
     
-    # Save predictions with error analysis
+    # Save training predictions with error analysis - TRAINING DATA ONLY
     predictions_df = pd.DataFrame()
     for i, col in enumerate(target_cols):
         predictions_df[f"{col}_actual"] = y_test[col].values
@@ -809,7 +564,7 @@ def save_comprehensive_results(all_metrics, all_predictions, y_test, target_cols
     
     predictions_df.to_csv('results/regression/detailed_predictions_with_errors.csv', index=False)
     
-    # Save model comparison with CV scores
+    # Save model comparison with CV scores - TRAINING RESULTS ONLY
     comparison_data = {}
     for model_name in all_metrics.keys():
         comparison_data[model_name] = {
@@ -821,10 +576,12 @@ def save_comprehensive_results(all_metrics, all_predictions, y_test, target_cols
     comparison_df = pd.DataFrame(comparison_data).T
     comparison_df.to_csv('results/regression/model_comparison_with_cv.csv')
     
-    # Save hyperparameter tuning results
+    # Save hyperparameter tuning results - TRAINING RESULTS ONLY
     with open('results/regression/hyperparameter_tuning_results.txt', 'w') as f:
-        f.write("HYPERPARAMETER TUNING RESULTS\n")
+        f.write("HYPERPARAMETER TUNING RESULTS (TRAINING)\n")
         f.write("=" * 50 + "\n\n")
+        f.write("⚠️  NOTE: These are training results only.\n")
+        f.write("   For forecasts, use 'uv run restaurant_forecast_tool.py'\n\n")
         
         for model_name, params in best_params.items():
             f.write(f"{model_name}:\n")
@@ -838,11 +595,12 @@ def save_comprehensive_results(all_metrics, all_predictions, y_test, target_cols
             else:
                 f.write(f"  Cross-validation MAE: N/A (Ensemble model)\n\n")
     
-    print("Comprehensive results saved to results/regression/ directory:")
-    print("- model_performance_detailed.txt: Detailed performance report")
-    print("- detailed_predictions_with_errors.csv: Predictions with error analysis")
+    print("Training results saved to results/regression/ directory:")
+    print("- model_performance_detailed.txt: Training performance report")
+    print("- detailed_predictions_with_errors.csv: Training predictions with error analysis")
     print("- model_comparison_with_cv.csv: Model comparison including CV scores")
     print("- hyperparameter_tuning_results.txt: Best hyperparameters found")
+    print("\n💡 For actual forecasts, use: uv run restaurant_forecast_tool.py --dataset your_data.csv")
 
 def create_ensemble_model(models, all_predictions, y_test):
     """Create an ensemble model from the best performing models"""
@@ -967,11 +725,9 @@ def main(dataset_path=None):
     # Save comprehensive results
     save_comprehensive_results(all_metrics, all_predictions, y_test, target_cols, selected_features, best_params, cv_scores)
     
-    # Generate manager forecast with the best regression model
-    manager_forecast = create_manager_forecast(models, scaler, selector, df_fe, target_cols, selected_features, best_model, forecast_days=7)
-    
-    # Generate manager report
-    save_manager_report(manager_forecast, target_cols, best_model, all_metrics[best_model], "Regression")
+    # Skip manager forecast generation - this will be handled by restaurant_forecast_tool.py
+    print("\n📋 Regression training completed successfully!")
+    print("💡 Use 'uv run restaurant_forecast_tool.py' to generate accurate forecasts")
     
     print("\n✅ Regression pipeline with CV and hyperparameter tuning completed successfully!")
     print("\nCheck the following directories:")

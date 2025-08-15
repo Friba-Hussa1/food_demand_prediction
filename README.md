@@ -1,8 +1,6 @@
 # 🍗 Restaurant Inventory Forecasting Dashboard  
 
-<<<<<<< HEAD
 A comprehensive machine learning system that predicts restaurant inventory needs using advanced regression models and time series analysis. This production-ready system achieved **74.0% accuracy** with **4.9% portfolio error** and provides automated inventory recommendations with safety stock calculations.
-=======
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](#)  
 [![Python](https://img.shields.io/badge/Python-3.10+-blue)](#)  
 [![Flask](https://img.shields.io/badge/Flask-2.3+-red)](#)  
@@ -10,7 +8,6 @@ A comprehensive machine learning system that predicts restaurant inventory needs
 
 A **user-friendly web dashboard** that empowers restaurant managers to **predict inventory needs**,  
 **analyze sales trends**, and **detect anomalies** — helping make smarter stocking decisions, all in one place.  
->>>>>>> origin/deployment
 
 ---
 
@@ -27,7 +24,6 @@ A **user-friendly web dashboard** that empowers restaurant managers to **predict
 - **Export Forecasts** to CSV
 - **Responsive Design** — Mobile & Desktop Friendly
 
-<<<<<<< HEAD
 ### 🏆 Key Achievement
 Transformed failing models into production-ready forecasts (R² = 0.740) with **46.1% better portfolio accuracy** than ARIMA models through systematic machine learning methodology and portfolio-level comparison.
 
@@ -47,7 +43,6 @@ The dataset contains **1,461 records** (4 years: 2021-2024) of delivery windows 
 | `dips` | Dip containers | ~500 units | Medium |
 | `drinks` | Fountain drinks | ~220 units | Medium |
 | `flavours` | Sauce flavors | ~770 units | Medium |
-=======
 ### 🚀 Deployment Ready
 - **Dockerized** for quick setup
 - **Secure File Handling**
@@ -60,7 +55,6 @@ The dataset contains **1,461 records** (4 years: 2021-2024) of delivery windows 
 - **Python** 3.10+
 - **Docker & Docker Compose** (for containerized setup)
 - **8GB RAM** (recommended for large datasets)
->>>>>>> origin/deployment
 
 ---
 
@@ -116,7 +110,6 @@ Azure Container Instances
 Heroku / Render
 docker-compose --profile production up -d
 
-<<<<<<< HEAD
 # Train ARIMA models (requires statsmodels)
 uv run arima_forecasting.py data/inventory_delivery_forecast_data.csv
 
@@ -376,11 +369,9 @@ uv run restaurant_forecast_tool.py --predict --model regression --anomaly-detect
 - Manager-friendly outputs with actionable inventory recommendations
 
 ---
-=======
 👥 Authors
 Abdul-Rasaq Omisesan
 Bikash Giri
 Gavriel Kirichenko
 Callum Arul
 Friba Hussainyar
->>>>>>> origin/deployment

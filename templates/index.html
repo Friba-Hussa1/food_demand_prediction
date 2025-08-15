@@ -94,6 +94,13 @@
                                     Enable Anomaly Detection
                                 </label>
                             </div>
+                            <div class="form-group">
+                                <label class="checkbox-label" id="predict-only-label">
+                                    <input type="checkbox" id="predict-only" name="predict_only" disabled>
+                                    <span class="checkmark"></span>
+                                    Use cached models (faster prediction - only works after training once)
+                                </label>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary" id="generate-forecast" disabled>
                             <i class="fas fa-chart-line"></i>
@@ -163,12 +170,6 @@
                 <section class="card">
                     <div class="card-header">
                         <h2><i class="fas fa-calculator"></i> Forecast Summary</h2>
-                        <div class="card-actions">
-                            <button class="btn btn-secondary" id="export-csv">
-                                <i class="fas fa-download"></i>
-                                Export CSV
-                            </button>
-                        </div>
                     </div>
                     <div class="card-body">
                         <div class="summary-grid" id="summary-grid">
@@ -205,6 +206,12 @@
                 <section class="card">
                     <div class="card-header">
                         <h2><i class="fas fa-table"></i> Detailed Forecast Data</h2>
+                        <div class="card-actions">
+                            <button class="btn btn-secondary" id="export-csv">
+                                <i class="fas fa-download"></i>
+                                Export CSV
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="table-container">
@@ -213,15 +220,15 @@
                                     <tr>
                                         <th>Date</th>
                                         <th>Day</th>
-                                        <th>Wings</th>
-                                        <th>Tenders</th>
-                                        <th>Fries (Reg)</th>
-                                        <th>Fries (Large)</th>
-                                        <th>Veggies</th>
-                                        <th>Dips</th>
-                                        <th>Drinks</th>
-                                        <th>Flavours</th>
-                                        <th>Total</th>
+                                        <th>Wings<br><small>Forecast (Stock)</small></th>
+                                        <th>Tenders<br><small>Forecast (Stock)</small></th>
+                                        <th>Fries (Reg)<br><small>Forecast (Stock)</small></th>
+                                        <th>Fries (Large)<br><small>Forecast (Stock)</small></th>
+                                        <th>Veggies<br><small>Forecast (Stock)</small></th>
+                                        <th>Dips<br><small>Forecast (Stock)</small></th>
+                                        <th>Drinks<br><small>Forecast (Stock)</small></th>
+                                        <th>Flavours<br><small>Forecast (Stock)</small></th>
+                                        <th>Total<br><small>Forecast (Stock)</small></th>
                                     </tr>
                                 </thead>
                                 <tbody>

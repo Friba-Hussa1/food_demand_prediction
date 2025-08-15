@@ -21,8 +21,6 @@ def create_directories():
     os.makedirs('models/arima', exist_ok=True)
     os.makedirs('results/arima', exist_ok=True)
     os.makedirs('results/arima/plots', exist_ok=True)
-    os.makedirs('results/arima/manager_reports', exist_ok=True)
-    os.makedirs('forecasts/final', exist_ok=True)
 
 def load_and_prepare_data(dataset_path):
     """Load and prepare the dataset for ARIMA modeling with enhanced features"""
@@ -498,10 +496,12 @@ def save_arima_models(arima_models, arima_params, arima_performance, model_metad
     joblib.dump(arima_performance, 'models/arima/arima_performance.pkl')
     joblib.dump(model_metadata, 'models/arima/arima_metadata.pkl')
     
-    # Save enhanced performance summary
+    # Save enhanced performance summary - TRAINING RESULTS ONLY
     with open('results/arima/arima_performance_summary.txt', 'w') as f:
-        f.write("ENHANCED ARIMA MODEL PERFORMANCE SUMMARY\n")
+        f.write("ARIMA MODEL TRAINING RESULTS\n")
         f.write("=" * 60 + "\n\n")
+        f.write("⚠️  NOTE: These are TRAINING performance metrics only.\n")
+        f.write("   For actual forecasts, use 'uv run restaurant_forecast_tool.py'\n\n")
         
         for col, perf in arima_performance.items():
             metadata = model_metadata.get(col, {})
@@ -527,19 +527,21 @@ def save_arima_models(arima_models, arima_params, arima_performance, model_metad
         model_types = [perf.get('model_type', 'ARIMA') for perf in arima_performance.values()]
         type_counts = pd.Series(model_types).value_counts()
         
-        f.write("OVERALL PERFORMANCE:\n")
+        f.write("OVERALL TRAINING PERFORMANCE:\n")
         f.write(f"  Average MAE: {avg_mae:.2f}\n")
         f.write(f"  Average R²: {avg_r2:.3f}\n")
         f.write(f"  Models trained: {len(arima_performance)}\n")
         f.write(f"\nMODEL TYPE DISTRIBUTION:\n")
         for model_type, count in type_counts.items():
             f.write(f"  {model_type}: {count}\n")
+        
+        f.write("\n" + "=" * 60 + "\n\n")
+        f.write("💡 FOR ACTUAL FORECASTS:\n")
+        f.write("   Use: uv run restaurant_forecast_tool.py --dataset your_data.csv\n")
+        f.write("   This will generate accurate forecasts using the trained models.\n")
     
-    # Save ARIMA forecast for manager
-    if forecast_df is not None:
-        forecast_df.to_csv('results/arima/manager_reports/arima_forecast.csv', index=False)
-    
-    print("Enhanced ARIMA models and results saved to models/arima/ and results/arima/ directories")
+    print("ARIMA training results saved to models/arima/ and results/arima/ directories")
+    print("💡 For actual forecasts, use: uv run restaurant_forecast_tool.py --dataset your_data.csv")
 
 def main(dataset_path=None):
     """Main function to run fast ARIMA forecasting pipeline"""

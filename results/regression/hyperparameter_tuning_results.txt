@@ -1,28 +1,31 @@
-HYPERPARAMETER TUNING RESULTS
+HYPERPARAMETER TUNING RESULTS (TRAINING)
 ==================================================
+
+⚠️  NOTE: These are training results only.
+   For forecasts, use 'uv run restaurant_forecast_tool.py'
 
 Linear Regression:
   No hyperparameters tuned
-  Cross-validation MAE: 16.132
+  Cross-validation MAE: 54.922
 
 Ridge:
   alpha: 0.01
-  Cross-validation MAE: 16.410
+  Cross-validation MAE: 37.037
 
 Lasso:
   alpha: 0.1
-  Cross-validation MAE: 16.051
+  Cross-validation MAE: 36.482
 
 ElasticNet:
   alpha: 0.1
-  l1_ratio: 0.95
-  Cross-validation MAE: 16.491
+  l1_ratio: 0.9
+  Cross-validation MAE: 37.387
 
 Extra Trees:
   n_estimators: 300
-  min_samples_split: 5
+  min_samples_split: 2
   min_samples_leaf: 1
   max_features: None
-  max_depth: None
-  Cross-validation MAE: 20.818
+  max_depth: 10
+  Cross-validation MAE: 51.792
 

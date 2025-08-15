@@ -1,14 +1,17 @@
-__pycache__/
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
 *.pyc
 *.pyo
 *.pyd
 .Python
-env/
-venv/
-.venv/
+env
 pip-log.txt
 pip-delete-this-directory.txt
-.tox/
+.tox
 .coverage
 .coverage.*
 .cache
@@ -16,25 +19,53 @@ nosetests.xml
 coverage.xml
 *.cover
 *.log
-.git/
-.mypy_cache/
-.pytest_cache/
-.hypothesis/
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# OS
 .DS_Store
-*.egg-info/
-dist/
-build/
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Project specific
 uploads/*
 !uploads/.gitkeep
-results/regression/plots/
-results/arima/plots/
+results/
+forecasts/
+models/
+Autoencoder/*.h5
+Autoencoder/*.pkl
 *.pkl
-*.h5
 *.csv
-!data/inventory_delivery_forecast_data.csv
-node_modules/
+*.png
+*.jpg
+*.jpeg
+
+# Documentation
+*.md
+docs/
+
+# Development
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.development
+.env.test
+.env.production
+
+# Deployment
+deploy.sh
+docker-compose.yml
+service.yaml

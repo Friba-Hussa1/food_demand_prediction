@@ -1,98 +1,107 @@
-ENHANCED ARIMA MODEL PERFORMANCE SUMMARY
+ARIMA MODEL TRAINING RESULTS
 ============================================================
+
+⚠️  NOTE: These are TRAINING performance metrics only.
+   For actual forecasts, use 'uv run restaurant_forecast_tool.py'
 
 WINGS:
   Model Type: ARIMA
-  Parameters: (0, 1, 1)
+  Parameters: (1, 1, 2)
   Log Transformed: False
   External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
-  MAE: 299.33
-  RMSE: 375.79
-  R²: 0.614
-  AIC: 16003.17
-  BIC: 16063.14
+  MAE: 875.14
+  RMSE: 1379.24
+  R²: -0.319
+  AIC: 1278.88
+  BIC: 1311.88
 
 TENDERS:
   Model Type: ARIMA
   Parameters: (1, 0, 1)
   Log Transformed: False
   External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
-  MAE: 56.04
-  RMSE: 69.82
-  R²: 0.337
-  AIC: 12393.88
-  BIC: 12463.86
+  MAE: 145.02
+  RMSE: 213.05
+  R²: -0.120
+  AIC: 1023.32
+  BIC: 1056.49
 
 FRIES_REG:
   Model Type: ARIMA
-  Parameters: (1, 0, 1)
+  Parameters: (1, 1, 1)
   Log Transformed: False
   External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
-  MAE: 10.64
-  RMSE: 13.36
-  R²: 0.395
-  AIC: 8620.61
-  BIC: 8690.59
+  MAE: 23.33
+  RMSE: 32.21
+  R²: 0.048
+  AIC: 719.10
+  BIC: 749.74
 
 FRIES_LARGE:
   Model Type: ARIMA
   Parameters: (1, 1, 2)
   Log Transformed: False
   External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
-  MAE: 16.07
-  RMSE: 20.21
-  R²: 0.272
-  AIC: 9556.60
-  BIC: 9626.56
+  MAE: 36.58
+  RMSE: 48.54
+  R²: -0.181
+  AIC: 745.43
+  BIC: 778.43
 
 VEGGIES:
-  Model Type: ARIMA
-  Parameters: (1, 1, 1)
-  Log Transformed: False
-  External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
-  MAE: 11.68
-  RMSE: 14.30
-  R²: 0.331
-  AIC: 8853.73
-  BIC: 8918.70
-
-DIPS:
-  Model Type: ARIMA
-  Parameters: (0, 1, 1)
-  Log Transformed: False
-  External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
-  MAE: 72.97
-  RMSE: 90.94
-  R²: 0.468
-  AIC: 12895.36
-  BIC: 12955.33
-
-DRINKS:
   Model Type: ARIMA
   Parameters: (1, 1, 2)
   Log Transformed: False
   External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
-  MAE: 33.41
-  RMSE: 41.23
-  R²: 0.176
-  AIC: 11189.07
-  BIC: 11259.03
+  MAE: 35.02
+  RMSE: 46.43
+  R²: -0.195
+  AIC: 738.81
+  BIC: 771.81
 
-FLAVOURS:
+DIPS:
   Model Type: ARIMA
   Parameters: (1, 0, 1)
   Log Transformed: False
   External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
-  MAE: 31.72
-  RMSE: 40.09
-  R²: 0.660
-  AIC: 10963.82
-  BIC: 11033.80
+  MAE: 89.52
+  RMSE: 128.27
+  R²: -0.048
+  AIC: 902.48
+  BIC: 935.65
 
-OVERALL PERFORMANCE:
-  Average MAE: 66.48
-  Average R²: 0.407
+DRINKS:
+  Model Type: ARIMA
+  Parameters: (1, 1, 1)
+  Log Transformed: False
+  External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
+  MAE: 33.86
+  RMSE: 53.73
+  R²: -0.149
+  AIC: 798.70
+  BIC: 829.34
+
+FLAVOURS:
+  Model Type: ARIMA
+  Parameters: (1, 1, 2)
+  Log Transformed: False
+  External Regressors: ['day_of_week', 'is_weekend', 'is_friday', 'is_monday', 'month', 'month_sin', 'month_cos', 'dow_sin', 'dow_cos', 'is_month_start']
+  MAE: 109.00
+  RMSE: 186.04
+  R²: -0.089
+  AIC: 942.82
+  BIC: 975.82
+
+OVERALL TRAINING PERFORMANCE:
+  Average MAE: 168.44
+  Average R²: -0.132
   Models trained: 8
 
 MODEL TYPE DISTRIBUTION:
   ARIMA: 8
+
+============================================================
+
+💡 FOR ACTUAL FORECASTS:
+   Use: uv run restaurant_forecast_tool.py --dataset your_data.csv
+   This will generate accurate forecasts using the trained models.

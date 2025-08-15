@@ -607,69 +607,70 @@ def get_model_accuracy_info(model_type='regression'):
         raise ValueError(f"Unknown model type: {model_type}")
 
 def print_manager_report(forecast_df, target_cols, comparison_results=None, anomaly_info=None):
-    """Print a manager-friendly report to console"""
+    """Print a manager-friendly report to console and save to file"""
     
-    print("\n" + "="*60)
-    print("🍗 RESTAURANT INVENTORY FORECAST")
-    print("="*60)
+    # Create the report content
+    report_lines = []
+    report_lines.append("="*60)
+    report_lines.append("🍗 RESTAURANT INVENTORY FORECAST")
+    report_lines.append("="*60)
     
-    print(f"\n📅 Forecast Period: {forecast_df['Date'].iloc[0]} to {forecast_df['Date'].iloc[-1]}")
+    report_lines.append(f"\n📅 Forecast Period: {forecast_df['Date'].iloc[0]} to {forecast_df['Date'].iloc[-1]}")
     
     # Show model information
     model_type_used = 'regression'  # Default
     if 'Model_Type' in forecast_df.columns:
         model_type = forecast_df['Model_Type'].iloc[0]
         model_name = forecast_df['Model_Name'].iloc[0]
-        print(f"🎯 Model: {model_name} ({model_type})")
+        report_lines.append(f"🎯 Model: {model_name} ({model_type})")
         model_type_used = model_type.lower()
     else:
-        print(f"🎯 Model: Combined Forecast")
+        report_lines.append(f"🎯 Model: Combined Forecast")
     
     # Show comparison results if available
     if comparison_results:
-        print(f"📊 Model Comparison: {comparison_results}")
+        report_lines.append(f"📊 Model Comparison: {comparison_results}")
         
         # Add portfolio-level insights
         if "Portfolio MAPE" in comparison_results:
             if "Regression wins" in comparison_results:
-                print(f"💡 Holistic regression captured cross-item relationships effectively")
+                report_lines.append(f"💡 Holistic regression captured cross-item relationships effectively")
             elif "ARIMA wins" in comparison_results:
-                print(f"💡 Per-item ARIMA specialization outperformed holistic approach")
+                report_lines.append(f"💡 Per-item ARIMA specialization outperformed holistic approach")
     
     # Show anomaly detection results if available
     if anomaly_info:
-        print(f"🚨 Anomaly Detection: {anomaly_info}")
+        report_lines.append(f"🚨 Anomaly Detection: {anomaly_info}")
     
-    print("\n📊 DAILY RECOMMENDATIONS:")
-    print("-" * 50)
+    report_lines.append("\n📊 DAILY RECOMMENDATIONS:")
+    report_lines.append("-" * 50)
     
     for _, row in forecast_df.iterrows():
-        print(f"\n📆 {row['Date']} ({row['Day_of_Week']})", end="")
+        day_line = f"\n📆 {row['Date']} ({row['Day_of_Week']})"
         if row['Is_Weekend']:
-            print(" 🌟 WEEKEND")
-        else:
-            print()
+            day_line += " 🌟 WEEKEND"
+        report_lines.append(day_line)
         
-        print("   Recommended Stock Levels:")
+        report_lines.append("   Recommended Stock Levels:")
         for col in target_cols:
             col_title = col.title()
             stock_val = row[f'{col_title}_Recommended_Stock']
             forecast_val = row[f'{col_title}_Forecast']
-            print(f"   • {col_title:<12}: {stock_val:>3} units (forecast: {forecast_val})")
+            report_lines.append(f"   • {col_title:<12}: {stock_val:>3} units (forecast: {forecast_val})")
     
-    print("\n" + "="*60)
-    print("📋 WEEKLY TOTALS:")
-    print("-" * 30)
+    report_lines.append("\n" + "="*60)
+    report_lines.append("📋 WEEKLY TOTALS:")
+    report_lines.append("-" * 30)
     
     for col in target_cols:
         col_title = col.title()
         weekly_stock = forecast_df[f'{col_title}_Recommended_Stock'].sum()
         weekly_forecast = forecast_df[f'{col_title}_Forecast'].sum()
-        print(f"{col_title:<15}: {weekly_stock:>4} units (forecast: {weekly_forecast})")
+        report_lines.append(f"{col_title:<15}: {weekly_stock:>4} units (forecast: {weekly_forecast})")
     
     # Key insights
-    print("\n💡 KEY INSIGHTS:")
-    print("-" * 20)
+    report_lines.append("\n💡 KEY INSIGHTS:")
+    report_lines.append("-" * 20)
     
     # Weekend analysis
     weekend_count = forecast_df['Is_Weekend'].sum()
@@ -677,9 +678,9 @@ def print_manager_report(forecast_df, target_cols, comparison_results=None, anom
         weekend_avg = forecast_df[forecast_df['Is_Weekend']][f'{target_cols[0].title()}_Recommended_Stock'].mean()
         weekday_avg = forecast_df[~forecast_df['Is_Weekend']][f'{target_cols[0].title()}_Recommended_Stock'].mean()
         if weekend_avg > weekday_avg:
-            print(f"🌟 Weekend demand ~{((weekend_avg/weekday_avg-1)*100):.0f}% higher than weekdays")
+            report_lines.append(f"🌟 Weekend demand ~{((weekend_avg/weekday_avg-1)*100):.0f}% higher than weekdays")
         else:
-            print(f"🌟 {weekend_count} weekend days in forecast period")
+            report_lines.append(f"🌟 {weekend_count} weekend days in forecast period")
     
     # Peak day - handle NaN values
     total_col = f'{target_cols[0].title()}_Recommended_Stock'  # Use first item as proxy
@@ -688,13 +689,13 @@ def print_manager_report(forecast_df, target_cols, comparison_results=None, anom
             peak_idx = forecast_df[total_col].idxmax()
             if not pd.isna(peak_idx):
                 peak_day = forecast_df.loc[peak_idx]
-                print(f"📈 Highest demand day: {peak_day['Day_of_Week']}")
+                report_lines.append(f"📈 Highest demand day: {peak_day['Day_of_Week']}")
             else:
-                print(f"📈 Highest demand day: Unable to determine (all values equal)")
+                report_lines.append(f"📈 Highest demand day: Unable to determine (all values equal)")
         except (KeyError, ValueError):
-            print(f"📈 Highest demand day: Unable to determine (data issue)")
+            report_lines.append(f"📈 Highest demand day: Unable to determine (data issue)")
     else:
-        print(f"📈 Highest demand day: Unable to determine (no valid data)")
+        report_lines.append(f"📈 Highest demand day: Unable to determine (no valid data)")
     
     # Get dynamic model accuracy based on actual model used
     try:
@@ -707,17 +708,70 @@ def print_manager_report(forecast_df, target_cols, comparison_results=None, anom
             # If we can't get the accuracy, show the error instead of lying with fake numbers
             accuracy_info = f"Unable to determine (error: {str(e)[:50]}...)"
     
-    print("\n⚠️  NOTES:")
-    print("• Stock levels include 20% safety buffer")
-    print("• Monitor daily and adjust for special events")
-    print(f"• Model accuracy: {accuracy_info}")
+    report_lines.append("\n⚠️  NOTES:")
+    report_lines.append("• Stock levels include 20% safety buffer")
+    report_lines.append("• Monitor daily and adjust for special events")
+    report_lines.append(f"• Model accuracy: {accuracy_info}")
+    
+    # Print to console
+    for line in report_lines:
+        print(line)
+    
+    # SAVE THE EXACT SAME DATAFRAME THAT WAS DISPLAYED
+    os.makedirs('forecasts/final', exist_ok=True)
+    
+    # Save to final forecasts directory (the correct files)
+    with open('forecasts/final/RESTAURANT_TOOL_FORECAST.txt', 'w') as f:
+        for line in report_lines:
+            f.write(line + '\n')
+    
+    # Save the exact DataFrame that was displayed to CSV
+    forecast_df.to_csv('forecasts/final/RESTAURANT_TOOL_FORECAST.csv', index=False)
+    
+    # Save debug information to verify data integrity
+    with open('forecasts/final/FORECAST_DEBUG_INFO.txt', 'w') as f:
+        f.write("FORECAST DATA INTEGRITY CHECK\n")
+        f.write("=" * 50 + "\n\n")
+        f.write(f"Generated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"DataFrame shape: {forecast_df.shape}\n")
+        f.write(f"DataFrame columns: {list(forecast_df.columns)}\n\n")
+        
+        f.write("SAMPLE DATA (first 3 rows):\n")
+        f.write("-" * 30 + "\n")
+        for i, (_, row) in enumerate(forecast_df.head(3).iterrows()):
+            f.write(f"Row {i+1}: {row['Date']} ({row['Day_of_Week']})\n")
+            for col in target_cols:
+                col_title = col.title()
+                if f'{col_title}_Forecast' in row:
+                    f.write(f"  {col_title}: {row[f'{col_title}_Forecast']} forecast, {row[f'{col_title}_Recommended_Stock']} stock\n")
+            f.write("\n")
+        
+        f.write("WEEKLY TOTALS VERIFICATION:\n")
+        f.write("-" * 30 + "\n")
+        for col in target_cols:
+            col_title = col.title()
+            if f'{col_title}_Forecast' in forecast_df.columns:
+                weekly_forecast = forecast_df[f'{col_title}_Forecast'].sum()
+                weekly_stock = forecast_df[f'{col_title}_Recommended_Stock'].sum()
+                f.write(f"{col_title}: {weekly_forecast} forecast, {weekly_stock} stock\n")
+    
+    print(f"\n💾 Final forecast saved to: forecasts/final/RESTAURANT_TOOL_FORECAST.txt")
+    print(f"💾 Final CSV saved to: forecasts/final/RESTAURANT_TOOL_FORECAST.csv")
+    print(f"💾 Debug info saved to: forecasts/final/FORECAST_DEBUG_INFO.txt")
 
 def save_forecast_csv(forecast_df, filename="forecasts/next_week_forecast.csv"):
-    """Save forecast to CSV file"""
+    """Save forecast to CSV file - EXACT same DataFrame that was displayed"""
     os.makedirs('forecasts', exist_ok=True)
     os.makedirs('forecasts/final', exist_ok=True)
+    
+    # Save the EXACT DataFrame as-is (no modifications)
     forecast_df.to_csv(filename, index=False)
-    print(f"\n💾 Forecast saved to: {filename}")
+    print(f"\n💾 Forecast CSV saved to: {filename}")
+    
+    # Debug: Print first few rows to verify data integrity
+    print(f"📊 CSV Data Preview (first 2 rows):")
+    for i, (_, row) in enumerate(forecast_df.head(2).iterrows()):
+        print(f"   Row {i+1}: {row['Date']} - Wings: {row.get('Wings_Forecast', 'N/A')}, Tenders: {row.get('Tenders_Forecast', 'N/A')}")
 
 
 def main():
@@ -841,6 +895,9 @@ def main():
             # Train new regression models
             print("🔄 Training regression models...")
             try:
+                # Set matplotlib backend before training
+                os.environ['MPLBACKEND'] = 'Agg'
+                
                 # Import and run regression training directly
                 from inventory_forecasting_regression import main as train_regression
                 best_model_info = train_regression(args.dataset)
@@ -1009,17 +1066,24 @@ def main():
     
     print_manager_report(final_forecast, target_cols, comparison_results, anomaly_info)
     
+    # ALWAYS save the exact forecast DataFrame that was displayed
+    # This ensures CLI output matches saved files
+    print(f"\n💾 SAVING FORECAST DATA:")
+    print(f"📊 Final forecast DataFrame shape: {final_forecast.shape}")
+    print(f"📊 Final forecast columns: {list(final_forecast.columns)}")
+    
     # Save to CSV if requested
     if args.save_csv:
         save_forecast_csv(final_forecast)
-        
-        # Also save the final forecast as the best model in the final directory
         save_forecast_csv(final_forecast, "forecasts/final/RESTAURANT_TOOL_FORECAST.csv")
         
         # Also save individual model forecasts if both were generated
         if regression_forecast is not None and arima_forecast is not None:
             save_forecast_csv(regression_forecast, "forecasts/regression_forecast.csv")
             save_forecast_csv(arima_forecast, "forecasts/arima_forecast.csv")
+    else:
+        # Always save the final forecast even if not explicitly requested
+        save_forecast_csv(final_forecast, "forecasts/final/RESTAURANT_TOOL_FORECAST.csv")
     
     print(f"\n✅ Forecast complete! Plan your inventory accordingly.")
 

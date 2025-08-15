@@ -48,6 +48,9 @@ function checkSystemStatus() {
             if (data.status === 'healthy') {
                 statusElement.innerHTML = '<i class="fas fa-circle status-indicator"></i> Ready';
                 statusElement.style.color = '#48bb78';
+                
+                // Update predict-only checkbox based on cached models
+                updatePredictOnlyOption(data.models_cached);
             } else {
                 statusElement.innerHTML = '<i class="fas fa-circle status-indicator" style="color: #f56565;"></i> Error';
                 statusElement.style.color = '#f56565';
@@ -57,6 +60,45 @@ function checkSystemStatus() {
             console.error('System status check failed:', error);
             showToast('System Status', 'Unable to check system status', 'warning');
         });
+}
+
+function updatePredictOnlyOption(modelsCached) {
+    const predictOnlyCheckbox = document.getElementById('predict-only');
+    const predictOnlyLabel = document.getElementById('predict-only-label');
+    
+    if (!predictOnlyCheckbox || !predictOnlyLabel) {
+        console.warn('Predict-only elements not found');
+        return;
+    }
+    
+    if (modelsCached && (modelsCached.regression || modelsCached.arima)) {
+        predictOnlyCheckbox.disabled = false;
+        predictOnlyLabel.style.opacity = '1';
+        predictOnlyLabel.title = 'Models are cached and ready for fast prediction';
+        
+        // Update label text to show what's cached
+        let cachedInfo = [];
+        if (modelsCached.regression) cachedInfo.push('Regression');
+        if (modelsCached.arima) cachedInfo.push('ARIMA');
+        
+        // Find the text node after the checkmark span and update it
+        const textNodes = Array.from(predictOnlyLabel.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
+        if (textNodes.length > 0) {
+            const lastTextNode = textNodes[textNodes.length - 1];
+            lastTextNode.textContent = `Use cached models (${cachedInfo.join(' & ')} ready - faster prediction)`;
+        }
+    } else {
+        predictOnlyCheckbox.disabled = true;
+        predictOnlyLabel.style.opacity = '0.6';
+        predictOnlyLabel.title = 'No cached models available. Train models first.';
+        
+        // Reset to original text
+        const textNodes = Array.from(predictOnlyLabel.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
+        if (textNodes.length > 0) {
+            const lastTextNode = textNodes[textNodes.length - 1];
+            lastTextNode.textContent = 'Use cached models (faster prediction - only works after training once)';
+        }
+    }
 }
 
 // File upload handlers
@@ -172,7 +214,8 @@ function handleForecastSubmit(e) {
         filepath: filepath,
         model_type: formData.get('model_type'),
         forecast_days: parseInt(formData.get('forecast_days')),
-        anomaly_detection: formData.has('anomaly_detection')
+        anomaly_detection: formData.has('anomaly_detection'),
+        predict_only: formData.has('predict_only')
     };
     
     generateForecast(requestData);
@@ -196,6 +239,11 @@ function generateForecast(requestData) {
             currentForecastData = data;
             displayResults(data);
             showToast('Forecast Complete', 'Forecast generated successfully', 'success');
+            
+            // Check system status again to update cached model availability
+            setTimeout(() => {
+                checkSystemStatus();
+            }, 1000);
         } else {
             showToast('Forecast Failed', data.error, 'error');
         }
@@ -208,12 +256,23 @@ function generateForecast(requestData) {
 }
 
 function getLoadingMessage(requestData) {
-    const messages = [
-        'Loading and preprocessing data...',
-        'Training machine learning models...',
-        'Generating predictions...',
-        'Calculating performance metrics...'
-    ];
+    let messages;
+    
+    if (requestData.predict_only) {
+        messages = [
+            'Loading cached models...',
+            'Preprocessing data...',
+            'Generating predictions...',
+            'Finalizing results...'
+        ];
+    } else {
+        messages = [
+            'Loading and preprocessing data...',
+            'Training machine learning models...',
+            'Generating predictions...',
+            'Calculating performance metrics...'
+        ];
+    }
     
     if (requestData.anomaly_detection) {
         messages.push('Running anomaly detection...');
@@ -331,7 +390,9 @@ function updateSummaryStats(summary) {
             summaryItem.innerHTML = `
                 <h4>${itemNames[item]}</h4>
                 <div class="total">${summary.totals[item].total_forecast.toLocaleString()}</div>
-                <div class="subtitle">Total Forecast</div>
+                <div class="subtitle">Forecast</div>
+                <div class="stock-total">${summary.totals[item].total_recommended_stock.toLocaleString()}</div>
+                <div class="stock-subtitle">Recommended Stock (+20%)</div>
             `;
             summaryGrid.appendChild(summaryItem);
         }
@@ -444,22 +505,71 @@ function updateTable(forecastData) {
             row.classList.add('weekend-row');
         }
         
-        const total = (item.wings_forecast || 0) + (item.tenders_forecast || 0) + 
-                     (item.fries_reg_forecast || 0) + (item.fries_large_forecast || 0) + 
-                     (item.veggies_forecast || 0);
+        const totalForecast = (item.wings_forecast || 0) + (item.tenders_forecast || 0) + 
+                             (item.fries_reg_forecast || 0) + (item.fries_large_forecast || 0) + 
+                             (item.veggies_forecast || 0);
+        
+        const totalStock = (item.wings_recommended_stock || 0) + (item.tenders_recommended_stock || 0) + 
+                          (item.fries_reg_recommended_stock || 0) + (item.fries_large_recommended_stock || 0) + 
+                          (item.veggies_recommended_stock || 0);
         
         row.innerHTML = `
             <td>${item.date}</td>
             <td>${item.day_of_week}${item.is_weekend ? ' 🌟' : ''}</td>
-            <td>${(item.wings_forecast || 0).toLocaleString()}</td>
-            <td>${(item.tenders_forecast || 0).toLocaleString()}</td>
-            <td>${(item.fries_reg_forecast || 0).toLocaleString()}</td>
-            <td>${(item.fries_large_forecast || 0).toLocaleString()}</td>
-            <td>${(item.veggies_forecast || 0).toLocaleString()}</td>
-            <td>${(item.dips_forecast || 0).toLocaleString()}</td>
-            <td>${(item.drinks_forecast || 0).toLocaleString()}</td>
-            <td>${(item.flavours_forecast || 0).toLocaleString()}</td>
-            <td><strong>${total.toLocaleString()}</strong></td>
+            <td>
+                <div class="forecast-cell">
+                    <span class="forecast-value">${(item.wings_forecast || 0).toLocaleString()}</span>
+                    <span class="stock-value">(${(item.wings_recommended_stock || 0).toLocaleString()})</span>
+                </div>
+            </td>
+            <td>
+                <div class="forecast-cell">
+                    <span class="forecast-value">${(item.tenders_forecast || 0).toLocaleString()}</span>
+                    <span class="stock-value">(${(item.tenders_recommended_stock || 0).toLocaleString()})</span>
+                </div>
+            </td>
+            <td>
+                <div class="forecast-cell">
+                    <span class="forecast-value">${(item.fries_reg_forecast || 0).toLocaleString()}</span>
+                    <span class="stock-value">(${(item.fries_reg_recommended_stock || 0).toLocaleString()})</span>
+                </div>
+            </td>
+            <td>
+                <div class="forecast-cell">
+                    <span class="forecast-value">${(item.fries_large_forecast || 0).toLocaleString()}</span>
+                    <span class="stock-value">(${(item.fries_large_recommended_stock || 0).toLocaleString()})</span>
+                </div>
+            </td>
+            <td>
+                <div class="forecast-cell">
+                    <span class="forecast-value">${(item.veggies_forecast || 0).toLocaleString()}</span>
+                    <span class="stock-value">(${(item.veggies_recommended_stock || 0).toLocaleString()})</span>
+                </div>
+            </td>
+            <td>
+                <div class="forecast-cell">
+                    <span class="forecast-value">${(item.dips_forecast || 0).toLocaleString()}</span>
+                    <span class="stock-value">(${(item.dips_recommended_stock || 0).toLocaleString()})</span>
+                </div>
+            </td>
+            <td>
+                <div class="forecast-cell">
+                    <span class="forecast-value">${(item.drinks_forecast || 0).toLocaleString()}</span>
+                    <span class="stock-value">(${(item.drinks_recommended_stock || 0).toLocaleString()})</span>
+                </div>
+            </td>
+            <td>
+                <div class="forecast-cell">
+                    <span class="forecast-value">${(item.flavours_forecast || 0).toLocaleString()}</span>
+                    <span class="stock-value">(${(item.flavours_recommended_stock || 0).toLocaleString()})</span>
+                </div>
+            </td>
+            <td>
+                <div class="forecast-cell">
+                    <strong class="forecast-value">${totalForecast.toLocaleString()}</strong>
+                    <strong class="stock-value">(${totalStock.toLocaleString()})</strong>
+                </div>
+            </td>
         `;
         
         tableBody.appendChild(row);
